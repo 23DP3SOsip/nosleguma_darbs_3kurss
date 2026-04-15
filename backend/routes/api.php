@@ -1,6 +1,20 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\AdminUserApiController;
+use App\Http\Controllers\Api\AuthApiController;
 use Illuminate\Support\Facades\Route;
 
-// Здесь добавляйте свои API маршруты
+Route::prefix('auth')->group(function (): void {
+	Route::post('/login', [AuthApiController::class, 'login']);
+
+	Route::middleware('api.token')->group(function (): void {
+		Route::get('/me', [AuthApiController::class, 'me']);
+		Route::post('/logout', [AuthApiController::class, 'logout']);
+	});
+});
+
+Route::middleware('api.token')->prefix('admin')->group(function (): void {
+	Route::get('/users', [AdminUserApiController::class, 'index']);
+	Route::post('/users', [AdminUserApiController::class, 'store']);
+	Route::delete('/users/{user}', [AdminUserApiController::class, 'destroy']);
+});

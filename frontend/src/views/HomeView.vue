@@ -1,25 +1,11 @@
 <template>
-  <div class="home">
-    <h1>Добро пожаловать!</h1>
-    <p>Это главная страница вашего проекта.</p>
-  </div>
+  <v-card class="pa-6" elevation="4">
+    <v-card-title class="text-h4 font-weight-bold px-0">Sākumlapa</v-card-title>
+    <v-card-text class="px-0 text-body-1">
+      Sveicināti sistēmā! Izvēlnē pieejama sadaļa "Admin panelis" lietotājiem ar lomām admin vai vadiba.
+    </v-card-text>
+  </v-card>
 </template>
 
 <script setup>
 </script>
-
-<style scoped>
-.home {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-h1 {
-  color: #ffffff;
-}
-
-p {
-  color: #ffffff;
-  font-size: 16px;
-}
-</style>
