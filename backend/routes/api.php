@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AdminUserApiController;
 use App\Http\Controllers\Api\AuthApiController;
+use App\Http\Controllers\Api\CarApiController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function (): void {
@@ -11,6 +12,12 @@ Route::prefix('auth')->group(function (): void {
 		Route::get('/me', [AuthApiController::class, 'me']);
 		Route::post('/logout', [AuthApiController::class, 'logout']);
 	});
+});
+
+Route::middleware('api.token')->group(function (): void {
+	Route::get('/cars', [CarApiController::class, 'index']);
+	Route::post('/cars/{car}/reserve', [CarApiController::class, 'reserve']);
+	Route::post('/cars/{car}/complete', [CarApiController::class, 'complete']);
 });
 
 Route::middleware('api.token')->prefix('admin')->group(function (): void {
