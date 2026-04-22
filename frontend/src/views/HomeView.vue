@@ -17,6 +17,16 @@ const summary = computed(() => ({
   reserved: cars.value.filter((car) => !car.is_available).length,
 }))
 
+const roleLabel = (role) => {
+  return (
+    {
+      vadiba: 'Vadība',
+      admin: 'Administrators',
+      user: 'Lietotājs',
+    }[role] || role || ''
+  )
+}
+
 const myActiveReservation = computed(() => {
   return cars.value.find((car) => car.active_reservation?.user?.id === authStore.user?.id) || null
 })
@@ -66,7 +76,7 @@ onMounted(loadCars)
           <h1 class="hero-title mb-4">Rezervējiet automašīnu tieši no galvenās lapas</h1>
           <p class="hero-text mb-0">
             Redziet visas automašīnas, to statusu, kurš tās izmanto un kad sākta pašreizējā rezervācija.
-            Lietotāji ar lomu <strong>User</strong> var turēt tikai vienu aktīvu rezervāciju, bet <strong>Admin</strong> un <strong>Vadiba</strong> var rezervēt neierobežoti.
+            Lietotāji ar lomu <strong>Lietotājs</strong> var turēt tikai vienu aktīvu rezervāciju, bet <strong>Administrators</strong> un <strong>Vadība</strong> var rezervēt neierobežoti.
           </p>
         </div>
 
@@ -120,7 +130,7 @@ onMounted(loadCars)
               <strong>{{ car.model }}</strong>
             </div>
             <div class="info-row">
-              <span>KPP</span>
+              <span>Ātrumkārba</span>
               <strong>{{ car.transmission_type }}</strong>
             </div>
 
