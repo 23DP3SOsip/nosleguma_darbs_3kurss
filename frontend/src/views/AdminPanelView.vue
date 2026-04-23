@@ -17,11 +17,19 @@ const roleLabel = computed(() => {
 })
 
 const users = ref([])
-const loading = ref(false)
-const saving = ref(false)
+const loadingUsers = ref(false)
+const savingUser = ref(false)
 const deletingId = ref(null)
-const errorMessage = ref('')
-const successMessage = ref('')
+const userErrorMessage = ref('')
+const userSuccessMessage = ref('')
+
+const cars = ref([])
+const loadingCars = ref(false)
+const savingCar = ref(false)
+const deletingCarId = ref(null)
+const carErrorMessage = ref('')
+const carSuccessMessage = ref('')
+const editingCarId = ref(null)
 
 const form = ref({
   name: '',
@@ -29,6 +37,16 @@ const form = ref({
   password: '',
   role: '',
 })
+
+const carForm = ref({
+  brand: '',
+  model: '',
+  plate_number: '',
+  transmission_type: '',
+  image_url: '',
+})
+
+const transmissionTypes = ['Automātiskā', 'Manuālā']
 
 const allowedRoles = computed(() => {
   if (authStore.role === 'vadiba') {
@@ -43,33 +61,33 @@ const allowedRoles = computed(() => {
 })
 
 const loadUsers = async () => {
-  loading.value = true
-  errorMessage.value = ''
+  loadingUsers.value = true
+  userErrorMessage.value = ''
 
   try {
     const { data } = await api.get('/api/admin/users')
     users.value = data.users
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'Neizdevās ielādēt lietotājus.'
+    userErrorMessage.value = error.response?.data?.message || 'Neizdevās ielādēt lietotājus.'
   } finally {
-    loading.value = false
+    loadingUsers.value = false
   }
 }
 
 const createUser = async () => {
-  saving.value = true
-  errorMessage.value = ''
-  successMessage.value = ''
+  savingUser.value = true
+  userErrorMessage.value = ''
+  userSuccessMessage.value = ''
 
   try {
     await api.post('/api/admin/users', form.value)
-    successMessage.value = 'Lietotājs veiksmīgi izveidots.'
+    userSuccessMessage.value = 'Lietotājs veiksmīgi izveidots.'
     form.value = { name: '', email: '', password: '', role: '' }
     await loadUsers()
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'Neizdevās izveidot lietotāju.'
+    userErrorMessage.value = error.response?.data?.message || 'Neizdevās izveidot lietotāju.'
   } finally {
-    saving.value = false
+    savingUser.value = false
   }
 }
 
@@ -91,21 +109,112 @@ const deleteUser = async (user) => {
   }
 
   deletingId.value = user.id
-  errorMessage.value = ''
-  successMessage.value = ''
+  userErrorMessage.value = ''
+  userSuccessMessage.value = ''
 
   try {
     await api.delete(`/api/admin/users/${user.id}`)
-    successMessage.value = 'Lietotājs veiksmīgi dzēsts.'
+    userSuccessMessage.value = 'Lietotājs veiksmīgi dzēsts.'
     await loadUsers()
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'Neizdevās dzēst lietotāju.'
+    userErrorMessage.value = error.response?.data?.message || 'Neizdevās dzēst lietotāju.'
   } finally {
     deletingId.value = null
   }
 }
 
-onMounted(loadUsers)
+const loadCars = async () => {
+  loadingCars.value = true
+  carErrorMessage.value = ''
+
+  try {
+    const { data } = await api.get('/api/admin/cars')
+    cars.value = data.cars
+  } catch (error) {
+    carErrorMessage.value = error.response?.data?.message || 'Neizdevās ielādēt automašīnas.'
+  } finally {
+    loadingCars.value = false
+  }
+}
+
+const resetCarForm = () => {
+  editingCarId.value = null
+  carForm.value = {
+    brand: '',
+    model: '',
+    plate_number: '',
+    transmission_type: '',
+    image_url: '',
+  }
+}
+
+const fillCarFormForEdit = (car) => {
+  editingCarId.value = car.id
+  carForm.value = {
+    brand: car.brand,
+    model: car.model,
+    plate_number: car.plate_number,
+    transmission_type: car.transmission_type,
+    image_url: car.image_url || '',
+  }
+}
+
+const saveCar = async () => {
+  savingCar.value = true
+  carErrorMessage.value = ''
+  carSuccessMessage.value = ''
+
+  try {
+    const payload = {
+      ...carForm.value,
+      image_url: carForm.value.image_url || null,
+    }
+
+    if (editingCarId.value) {
+      await api.put(`/api/admin/cars/${editingCarId.value}`, payload)
+      carSuccessMessage.value = 'Automašīna veiksmīgi atjaunota.'
+    } else {
+      await api.post('/api/admin/cars', payload)
+      carSuccessMessage.value = 'Automašīna veiksmīgi izveidota.'
+    }
+
+    resetCarForm()
+    await loadCars()
+  } catch (error) {
+    carErrorMessage.value = error.response?.data?.message || 'Neizdevās saglabāt automašīnu.'
+  } finally {
+    savingCar.value = false
+  }
+}
+
+const deleteCar = async (car) => {
+  if (!window.confirm('Vai tiešām dzēst šo automašīnu?')) {
+    return
+  }
+
+  deletingCarId.value = car.id
+  carErrorMessage.value = ''
+  carSuccessMessage.value = ''
+
+  try {
+    await api.delete(`/api/admin/cars/${car.id}`)
+    carSuccessMessage.value = 'Automašīna veiksmīgi dzēsta.'
+
+    if (editingCarId.value === car.id) {
+      resetCarForm()
+    }
+
+    await loadCars()
+  } catch (error) {
+    carErrorMessage.value = error.response?.data?.message || 'Neizdevās dzēst automašīnu.'
+  } finally {
+    deletingCarId.value = null
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([loadUsers(), loadCars()])
+})
 </script>
 
 <template>
@@ -154,7 +263,7 @@ onMounted(loadUsers)
                   class="mb-4"
                 />
 
-                <v-btn type="submit" color="primary" block :loading="saving" :disabled="saving || !allowedRoles.length">
+                <v-btn type="submit" color="primary" block :loading="savingUser" :disabled="savingUser || !allowedRoles.length">
                   Izveidot lietotāju
                 </v-btn>
               </v-form>
@@ -165,10 +274,10 @@ onMounted(loadUsers)
             <v-card elevation="2" class="pa-2 pa-md-4 h-100">
               <v-card-title>Visi lietotāji</v-card-title>
 
-              <v-alert v-if="errorMessage" type="error" variant="tonal" class="mx-4 my-2">{{ errorMessage }}</v-alert>
-              <v-alert v-if="successMessage" type="success" variant="tonal" class="mx-4 my-2">{{ successMessage }}</v-alert>
+              <v-alert v-if="userErrorMessage" type="error" variant="tonal" class="mx-4 my-2">{{ userErrorMessage }}</v-alert>
+              <v-alert v-if="userSuccessMessage" type="success" variant="tonal" class="mx-4 my-2">{{ userSuccessMessage }}</v-alert>
 
-              <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-2" />
+              <v-progress-linear v-if="loadingUsers" indeterminate color="primary" class="mb-2" />
 
               <v-table>
                 <thead>
@@ -213,12 +322,107 @@ onMounted(loadUsers)
       </v-window-item>
 
       <v-window-item value="cars">
-        <v-card elevation="2" class="pa-6">
-          <v-card-title class="px-0">Automašīnas</v-card-title>
-          <v-card-text class="px-0 pb-0">
-            Šī sadaļa šobrīd ir sagatavota kā navigācijas cilne. Šeit vēlāk var pievienot automašīnu pārvaldību, foto un parametrus.
-          </v-card-text>
-        </v-card>
+        <v-row>
+          <v-col cols="12" md="4">
+            <v-card elevation="2" class="pa-4 h-100">
+              <v-card-title class="px-0">{{ editingCarId ? 'Automašīnas rediģēšana' : 'Jauna automašīna' }}</v-card-title>
+              <v-card-subtitle class="px-0 pb-4">
+                Aizpildiet automašīnas datus, lai tie tiktu parādīti rezervāciju lapā.
+              </v-card-subtitle>
+
+              <v-form @submit.prevent="saveCar">
+                <v-text-field v-model="carForm.brand" label="Zīmols" variant="outlined" density="comfortable" required class="mb-2" />
+                <v-text-field v-model="carForm.model" label="Modelis" variant="outlined" density="comfortable" required class="mb-2" />
+                <v-text-field v-model="carForm.plate_number" label="Numurzīme" variant="outlined" density="comfortable" required class="mb-2" />
+
+                <v-select
+                  v-model="carForm.transmission_type"
+                  :items="transmissionTypes"
+                  label="Ātrumkārba"
+                  variant="outlined"
+                  density="comfortable"
+                  required
+                  class="mb-2"
+                />
+
+                <v-text-field
+                  v-model="carForm.image_url"
+                  label="Attēla URL"
+                  variant="outlined"
+                  density="comfortable"
+                  placeholder="https://..."
+                  class="mb-4"
+                />
+
+                <div class="d-flex ga-2">
+                  <v-btn type="submit" color="primary" :loading="savingCar" :disabled="savingCar" block>
+                    {{ editingCarId ? 'Saglabāt izmaiņas' : 'Pievienot automašīnu' }}
+                  </v-btn>
+                  <v-btn v-if="editingCarId" color="secondary" variant="tonal" @click="resetCarForm">
+                    Atcelt
+                  </v-btn>
+                </div>
+              </v-form>
+            </v-card>
+          </v-col>
+
+          <v-col cols="12" md="8">
+            <v-card elevation="2" class="pa-2 pa-md-4 h-100">
+              <v-card-title>Visas automašīnas</v-card-title>
+
+              <v-alert v-if="carErrorMessage" type="error" variant="tonal" class="mx-4 my-2">{{ carErrorMessage }}</v-alert>
+              <v-alert v-if="carSuccessMessage" type="success" variant="tonal" class="mx-4 my-2">{{ carSuccessMessage }}</v-alert>
+
+              <v-progress-linear v-if="loadingCars" indeterminate color="primary" class="mb-2" />
+
+              <v-table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Automašīna</th>
+                    <th>Numurzīme</th>
+                    <th>Ātrumkārba</th>
+                    <th>Statuss</th>
+                    <th>Darbības</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="car in cars" :key="car.id">
+                    <td>{{ car.id }}</td>
+                    <td>
+                      <div class="font-weight-medium">{{ car.brand }} {{ car.model }}</div>
+                      <div class="text-caption text-medium-emphasis">{{ car.image_url || 'Nav attēla URL' }}</div>
+                    </td>
+                    <td>{{ car.plate_number }}</td>
+                    <td>{{ car.transmission_type }}</td>
+                    <td>
+                      <v-chip size="small" :color="car.is_reserved ? 'error' : 'success'" variant="tonal">
+                        {{ car.is_reserved ? `Rezervēta (${car.reserved_by || 'nezināms'})` : 'Brīva' }}
+                      </v-chip>
+                    </td>
+                    <td>
+                      <div class="d-flex ga-2">
+                        <v-btn size="small" color="primary" variant="flat" @click="fillCarFormForEdit(car)">
+                          Rediģēt
+                        </v-btn>
+                        <v-btn
+                          size="small"
+                          color="error"
+                          variant="flat"
+                          :loading="deletingCarId === car.id"
+                          :disabled="deletingCarId === car.id"
+                          @click="deleteCar(car)"
+                        >
+                          Dzēst
+                        </v-btn>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </v-table>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-window-item>
     </v-window>
   </v-card>
