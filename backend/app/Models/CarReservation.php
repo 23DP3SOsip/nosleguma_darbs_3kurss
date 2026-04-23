@@ -11,7 +11,6 @@ class CarReservation extends Model
     use HasFactory;
 
     public const STATUS_ACTIVE = 'active';
-    public const STATUS_CANCELLED = 'cancelled';
     public const STATUS_COMPLETED = 'completed';
 
     protected $fillable = [

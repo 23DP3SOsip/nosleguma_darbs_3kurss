@@ -167,7 +167,6 @@ class AdminCarApiController extends Controller
                     'status_label' => match ($reservation->status) {
                         CarReservation::STATUS_ACTIVE => 'Aktīva',
                         CarReservation::STATUS_COMPLETED => 'Pabeigta',
-                        CarReservation::STATUS_CANCELLED => 'Atcelta',
                         default => $reservation->status,
                     },
                     'car' => [
