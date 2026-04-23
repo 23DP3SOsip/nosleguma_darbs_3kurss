@@ -490,7 +490,7 @@ onMounted(async () => {
                   <div class="text-caption text-medium-emphasis">{{ log.user.role }}</div>
                 </td>
                 <td>
-                  <v-chip size="small" :color="log.status === 'active' ? 'info' : log.status === 'completed' ? 'success' : 'error'" variant="tonal">
+                  <v-chip size="small" :color="log.status === 'active' ? 'info' : 'success'" variant="tonal">
                     {{ log.status_label }}
                   </v-chip>
                 </td>

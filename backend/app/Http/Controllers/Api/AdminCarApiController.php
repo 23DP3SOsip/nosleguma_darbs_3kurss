@@ -156,6 +156,7 @@ class AdminCarApiController extends Controller
 
         $reservations = CarReservation::query()
             ->with(['car:id,brand,model,plate_number', 'user:id,name,role'])
+            ->whereIn('status', [CarReservation::STATUS_ACTIVE, CarReservation::STATUS_COMPLETED])
             ->orderByDesc('started_at')
             ->orderByDesc('id')
             ->limit(100)
@@ -167,7 +168,6 @@ class AdminCarApiController extends Controller
                     'status_label' => match ($reservation->status) {
                         CarReservation::STATUS_ACTIVE => 'Aktīva',
                         CarReservation::STATUS_COMPLETED => 'Pabeigta',
-                        default => $reservation->status,
                     },
                     'car' => [
                         'id' => $reservation->car?->id,
