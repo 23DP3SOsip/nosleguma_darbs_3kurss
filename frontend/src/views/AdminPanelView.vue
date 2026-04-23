@@ -31,6 +31,10 @@ const carErrorMessage = ref('')
 const carSuccessMessage = ref('')
 const editingCarId = ref(null)
 
+const reservationLogs = ref([])
+const loadingLogs = ref(false)
+const logsErrorMessage = ref('')
+
 const form = ref({
   name: '',
   email: '',
@@ -137,6 +141,20 @@ const loadCars = async () => {
   }
 }
 
+const loadReservationLogs = async () => {
+  loadingLogs.value = true
+  logsErrorMessage.value = ''
+
+  try {
+    const { data } = await api.get('/api/admin/reservations')
+    reservationLogs.value = data.reservations
+  } catch (error) {
+    logsErrorMessage.value = error.response?.data?.message || 'Neizdevās ielādēt braucienu žurnālu.'
+  } finally {
+    loadingLogs.value = false
+  }
+}
+
 const resetCarForm = () => {
   editingCarId.value = null
   carForm.value = {
@@ -213,7 +231,7 @@ const deleteCar = async (car) => {
 }
 
 onMounted(async () => {
-  await Promise.all([loadUsers(), loadCars()])
+  await Promise.all([loadUsers(), loadCars(), loadReservationLogs()])
 })
 </script>
 
@@ -235,6 +253,7 @@ onMounted(async () => {
     <v-tabs v-model="activeTab" color="primary" class="mb-4" align-tabs="start">
       <v-tab value="users">Lietotāji</v-tab>
       <v-tab value="cars">Automašīnas</v-tab>
+      <v-tab value="logs">Žurnāli</v-tab>
     </v-tabs>
 
     <v-window v-model="activeTab">
@@ -435,6 +454,56 @@ onMounted(async () => {
             </v-card>
           </v-col>
         </v-row>
+      </v-window-item>
+
+      <v-window-item value="logs">
+        <v-card elevation="2" class="pa-2 pa-md-4 h-100">
+          <v-card-title>Žurnāls par braucieniem</v-card-title>
+          <v-card-subtitle class="px-4 pb-2">
+            Šeit redzami visi rezervācijas ieraksti: kas rezervēja, kuru auto, kad sāka un kāds ir statuss.
+          </v-card-subtitle>
+
+          <v-alert v-if="logsErrorMessage" type="error" variant="tonal" class="mx-4 my-2">{{ logsErrorMessage }}</v-alert>
+
+          <v-progress-linear v-if="loadingLogs" indeterminate color="primary" class="mb-2" />
+
+          <v-table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Automašīna</th>
+                <th>Lietotājs</th>
+                <th>Statuss</th>
+                <th>Sākts</th>
+                <th>Pabeigts</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="log in reservationLogs" :key="log.id">
+                <td>{{ log.id }}</td>
+                <td>
+                  <div class="font-weight-medium">{{ log.car.brand }} {{ log.car.model }}</div>
+                  <div class="text-caption text-medium-emphasis">{{ log.car.plate_number }}</div>
+                </td>
+                <td>
+                  <div class="font-weight-medium">{{ log.user.name }}</div>
+                  <div class="text-caption text-medium-emphasis">{{ log.user.role }}</div>
+                </td>
+                <td>
+                  <v-chip size="small" :color="log.status === 'active' ? 'info' : log.status === 'completed' ? 'success' : 'error'" variant="tonal">
+                    {{ log.status_label }}
+                  </v-chip>
+                </td>
+                <td>{{ log.started_at ? new Date(log.started_at).toLocaleString('lv-LV') : '-' }}</td>
+                <td>{{ log.ended_at ? new Date(log.ended_at).toLocaleString('lv-LV') : '-' }}</td>
+              </tr>
+            </tbody>
+          </v-table>
+
+          <v-card-text v-if="!loadingLogs && !reservationLogs.length" class="text-medium-emphasis">
+            Žurnālā pagaidām nav ierakstu.
+          </v-card-text>
+        </v-card>
       </v-window-item>
     </v-window>
   </v-card>

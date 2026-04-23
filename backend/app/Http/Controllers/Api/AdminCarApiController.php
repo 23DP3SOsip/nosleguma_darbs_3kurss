@@ -143,4 +143,52 @@ class AdminCarApiController extends Controller
             'message' => 'Automašīna veiksmīgi dzēsta.',
         ]);
     }
+
+    public function reservations(Request $request): JsonResponse
+    {
+        $actor = $request->user();
+
+        if (! $actor || ! in_array($actor->role, ['admin', 'vadiba'], true)) {
+            return new JsonResponse([
+                'message' => 'Jums nav piekļuves šai sadaļai.',
+            ], 403);
+        }
+
+        $reservations = CarReservation::query()
+            ->with(['car:id,brand,model,plate_number', 'user:id,name,role'])
+            ->orderByDesc('started_at')
+            ->orderByDesc('id')
+            ->limit(100)
+            ->get()
+            ->map(static function (CarReservation $reservation): array {
+                return [
+                    'id' => $reservation->id,
+                    'status' => $reservation->status,
+                    'status_label' => match ($reservation->status) {
+                        CarReservation::STATUS_ACTIVE => 'Aktīva',
+                        CarReservation::STATUS_COMPLETED => 'Pabeigta',
+                        CarReservation::STATUS_CANCELLED => 'Atcelta',
+                        default => $reservation->status,
+                    },
+                    'car' => [
+                        'id' => $reservation->car?->id,
+                        'brand' => $reservation->car?->brand,
+                        'model' => $reservation->car?->model,
+                        'plate_number' => $reservation->car?->plate_number,
+                    ],
+                    'user' => [
+                        'id' => $reservation->user?->id,
+                        'name' => $reservation->user?->name,
+                        'role' => $reservation->user?->role,
+                    ],
+                    'started_at' => $reservation->started_at?->toISOString(),
+                    'ended_at' => $reservation->ended_at?->toISOString(),
+                    'created_at' => $reservation->created_at?->toISOString(),
+                ];
+            });
+
+        return new JsonResponse([
+            'reservations' => $reservations,
+        ]);
+    }
 }

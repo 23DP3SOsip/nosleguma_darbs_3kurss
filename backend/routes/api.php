@@ -26,6 +26,7 @@ Route::middleware('api.token')->prefix('admin')->group(function (): void {
 	Route::post('/users', [AdminUserApiController::class, 'store']);
 	Route::delete('/users/{user}', [AdminUserApiController::class, 'destroy']);
 	Route::get('/cars', [AdminCarApiController::class, 'index']);
+	Route::get('/reservations', [AdminCarApiController::class, 'reservations']);
 	Route::post('/cars', [AdminCarApiController::class, 'store']);
 	Route::put('/cars/{car}', [AdminCarApiController::class, 'update']);
 	Route::delete('/cars/{car}', [AdminCarApiController::class, 'destroy']);
