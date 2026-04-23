@@ -354,11 +354,23 @@ onMounted(async () => {
                   class="mb-4"
                 />
 
-                <div class="d-flex ga-2">
-                  <v-btn type="submit" color="primary" :loading="savingCar" :disabled="savingCar" block>
+                <div class="d-flex ga-2 car-form-actions">
+                  <v-btn
+                    type="submit"
+                    color="primary"
+                    :loading="savingCar"
+                    :disabled="savingCar"
+                    class="car-form-action-btn"
+                  >
                     {{ editingCarId ? 'Saglabāt izmaiņas' : 'Pievienot automašīnu' }}
                   </v-btn>
-                  <v-btn v-if="editingCarId" color="secondary" variant="tonal" @click="resetCarForm">
+                  <v-btn
+                    v-if="editingCarId"
+                    color="secondary"
+                    variant="tonal"
+                    class="car-form-action-btn"
+                    @click="resetCarForm"
+                  >
                     Atcelt
                   </v-btn>
                 </div>
@@ -431,5 +443,20 @@ onMounted(async () => {
 <style scoped>
 .admin-shell {
   overflow: hidden;
+}
+
+.car-form-actions {
+  width: 100%;
+}
+
+.car-form-action-btn {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .car-form-actions {
+    flex-direction: column;
+  }
 }
 </style>
