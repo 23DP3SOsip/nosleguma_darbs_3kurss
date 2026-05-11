@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AdminUserApiController;
+use App\Http\Controllers\Api\AdminMaintenanceApiController;
 use App\Http\Controllers\Api\AdminCarApiController;
 use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\CarApiController;
@@ -27,6 +28,9 @@ Route::middleware('api.token')->prefix('admin')->group(function (): void {
 	Route::delete('/users/{user}', [AdminUserApiController::class, 'destroy']);
 	Route::get('/cars', [AdminCarApiController::class, 'index']);
 	Route::get('/reservations', [AdminCarApiController::class, 'reservations']);
+	Route::get('/maintenance', [AdminMaintenanceApiController::class, 'index']);
+	Route::post('/maintenance', [AdminMaintenanceApiController::class, 'store']);
+	Route::delete('/maintenance/{log}', [AdminMaintenanceApiController::class, 'destroy']);
 	Route::post('/cars', [AdminCarApiController::class, 'store']);
 	Route::put('/cars/{car}', [AdminCarApiController::class, 'update']);
 	Route::delete('/cars/{car}', [AdminCarApiController::class, 'destroy']);

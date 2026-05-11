@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\CarReservation;
+use App\Models\CarMaintenanceLog;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -63,5 +64,10 @@ class User extends Authenticatable
     public function carReservations(): HasMany
     {
         return $this->hasMany(CarReservation::class);
+    }
+
+    public function carMaintenanceLogs(): HasMany
+    {
+        return $this->hasMany(CarMaintenanceLog::class);
     }
 }

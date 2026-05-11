@@ -31,6 +31,23 @@ const carErrorMessage = ref('')
 const carSuccessMessage = ref('')
 const editingCarId = ref(null)
 
+const maintenanceLogs = ref([])
+const loadingMaintenance = ref(false)
+const savingMaintenance = ref(false)
+const deletingMaintenanceId = ref(null)
+const maintenanceErrorMessage = ref('')
+const maintenanceSuccessMessage = ref('')
+const maintenanceTypes = ['TO', 'Plānotā apkope', 'Remonts', 'Diagnostika']
+
+const maintenanceForm = ref({
+  car_id: '',
+  maintenance_type: '',
+  description: '',
+  performed_at: '',
+  mileage: '',
+  cost: '',
+})
+
 const reservationLogs = ref([])
 const loadingLogs = ref(false)
 const logsErrorMessage = ref('')
@@ -51,6 +68,13 @@ const carForm = ref({
 })
 
 const transmissionTypes = ['Automātiskā', 'Manuālā']
+
+const carOptions = computed(() => {
+  return cars.value.map((car) => ({
+    title: `${car.brand} ${car.model} (${car.plate_number})`,
+    value: car.id,
+  }))
+})
 
 const allowedRoles = computed(() => {
   if (authStore.role === 'vadiba') {
@@ -155,6 +179,20 @@ const loadReservationLogs = async () => {
   }
 }
 
+const loadMaintenanceLogs = async () => {
+  loadingMaintenance.value = true
+  maintenanceErrorMessage.value = ''
+
+  try {
+    const { data } = await api.get('/api/admin/maintenance')
+    maintenanceLogs.value = data.logs
+  } catch (error) {
+    maintenanceErrorMessage.value = error.response?.data?.message || 'Neizdevās ielādēt apkopes žurnālu.'
+  } finally {
+    loadingMaintenance.value = false
+  }
+}
+
 const resetCarForm = () => {
   editingCarId.value = null
   carForm.value = {
@@ -230,8 +268,62 @@ const deleteCar = async (car) => {
   }
 }
 
+const resetMaintenanceForm = () => {
+  maintenanceForm.value = {
+    car_id: '',
+    maintenance_type: '',
+    description: '',
+    performed_at: '',
+    mileage: '',
+    cost: '',
+  }
+}
+
+const saveMaintenance = async () => {
+  savingMaintenance.value = true
+  maintenanceErrorMessage.value = ''
+  maintenanceSuccessMessage.value = ''
+
+  try {
+    const payload = {
+      ...maintenanceForm.value,
+      mileage: maintenanceForm.value.mileage === '' ? null : maintenanceForm.value.mileage,
+      cost: maintenanceForm.value.cost === '' ? null : maintenanceForm.value.cost,
+    }
+
+    await api.post('/api/admin/maintenance', payload)
+    maintenanceSuccessMessage.value = 'Apkopes ieraksts veiksmīgi pievienots.'
+    resetMaintenanceForm()
+    await loadMaintenanceLogs()
+  } catch (error) {
+    maintenanceErrorMessage.value = error.response?.data?.message || 'Neizdevās saglabāt apkopes ierakstu.'
+  } finally {
+    savingMaintenance.value = false
+  }
+}
+
+const deleteMaintenanceLog = async (log) => {
+  if (!window.confirm('Vai tiešām dzēst šo apkopes ierakstu?')) {
+    return
+  }
+
+  deletingMaintenanceId.value = log.id
+  maintenanceErrorMessage.value = ''
+  maintenanceSuccessMessage.value = ''
+
+  try {
+    await api.delete(`/api/admin/maintenance/${log.id}`)
+    maintenanceSuccessMessage.value = 'Apkopes ieraksts dzēsts.'
+    await loadMaintenanceLogs()
+  } catch (error) {
+    maintenanceErrorMessage.value = error.response?.data?.message || 'Neizdevās dzēst apkopes ierakstu.'
+  } finally {
+    deletingMaintenanceId.value = null
+  }
+}
+
 onMounted(async () => {
-  await Promise.all([loadUsers(), loadCars(), loadReservationLogs()])
+  await Promise.all([loadUsers(), loadCars(), loadReservationLogs(), loadMaintenanceLogs()])
 })
 </script>
 
@@ -253,6 +345,7 @@ onMounted(async () => {
     <v-tabs v-model="activeTab" color="primary" class="mb-4" align-tabs="start">
       <v-tab value="users">Lietotāji</v-tab>
       <v-tab value="cars">Automašīnas</v-tab>
+      <v-tab value="maintenance">Apkope</v-tab>
       <v-tab value="logs">Žurnāli</v-tab>
     </v-tabs>
 
@@ -504,6 +597,146 @@ onMounted(async () => {
             Žurnālā pagaidām nav ierakstu.
           </v-card-text>
         </v-card>
+      </v-window-item>
+
+      <v-window-item value="maintenance">
+        <v-row>
+          <v-col cols="12" md="4">
+            <v-card elevation="2" class="pa-4 h-100">
+              <v-card-title class="px-0">Jauns apkopes ieraksts</v-card-title>
+              <v-card-subtitle class="px-0 pb-4">
+                Izvēlieties automašīnu un pievienojiet ТО vai remonta informāciju.
+              </v-card-subtitle>
+
+              <v-form @submit.prevent="saveMaintenance">
+                <v-select
+                  v-model="maintenanceForm.car_id"
+                  :items="carOptions"
+                  item-title="title"
+                  item-value="value"
+                  label="Automašīna"
+                  variant="outlined"
+                  density="comfortable"
+                  required
+                  class="mb-2"
+                />
+
+                <v-select
+                  v-model="maintenanceForm.maintenance_type"
+                  :items="maintenanceTypes"
+                  label="Apkopes veids"
+                  variant="outlined"
+                  density="comfortable"
+                  required
+                  class="mb-2"
+                />
+
+                <v-textarea
+                  v-model="maintenanceForm.description"
+                  label="Apraksts"
+                  variant="outlined"
+                  density="comfortable"
+                  rows="3"
+                  auto-grow
+                  required
+                  class="mb-2"
+                />
+
+                <v-text-field
+                  v-model="maintenanceForm.performed_at"
+                  label="Datums"
+                  type="datetime-local"
+                  variant="outlined"
+                  density="comfortable"
+                  required
+                  class="mb-2"
+                />
+
+                <v-text-field
+                  v-model="maintenanceForm.mileage"
+                  label="Nobraukums"
+                  type="number"
+                  variant="outlined"
+                  density="comfortable"
+                  class="mb-2"
+                />
+
+                <v-text-field
+                  v-model="maintenanceForm.cost"
+                  label="Cena"
+                  type="number"
+                  step="0.01"
+                  variant="outlined"
+                  density="comfortable"
+                  class="mb-4"
+                />
+
+                <v-btn type="submit" color="primary" block :loading="savingMaintenance" :disabled="savingMaintenance || !carOptions.length">
+                  Pievienot ierakstu
+                </v-btn>
+              </v-form>
+            </v-card>
+          </v-col>
+
+          <v-col cols="12" md="8">
+            <v-card elevation="2" class="pa-2 pa-md-4 h-100">
+              <v-card-title>Apkopes ieraksti</v-card-title>
+
+              <v-alert v-if="maintenanceErrorMessage" type="error" variant="tonal" class="mx-4 my-2">{{ maintenanceErrorMessage }}</v-alert>
+              <v-alert v-if="maintenanceSuccessMessage" type="success" variant="tonal" class="mx-4 my-2">{{ maintenanceSuccessMessage }}</v-alert>
+
+              <v-progress-linear v-if="loadingMaintenance" indeterminate color="primary" class="mb-2" />
+
+              <v-table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Automašīna</th>
+                    <th>Veids</th>
+                    <th>Apraksts</th>
+                    <th>Datums</th>
+                    <th>Nobraukums</th>
+                    <th>Cena</th>
+                    <th>Darbības</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="log in maintenanceLogs" :key="log.id">
+                    <td>{{ log.id }}</td>
+                    <td>
+                      <div class="font-weight-medium">{{ log.car.brand }} {{ log.car.model }}</div>
+                      <div class="text-caption text-medium-emphasis">{{ log.car.plate_number }}</div>
+                    </td>
+                    <td>{{ log.maintenance_type }}</td>
+                    <td>
+                      <div>{{ log.description }}</div>
+                      <div class="text-caption text-medium-emphasis">{{ log.user.name }}</div>
+                    </td>
+                    <td>{{ log.performed_at ? new Date(log.performed_at).toLocaleString('lv-LV') : '-' }}</td>
+                    <td>{{ log.mileage ?? '-' }}</td>
+                    <td>{{ log.cost ?? '-' }}</td>
+                    <td>
+                      <v-btn
+                        color="error"
+                        size="small"
+                        variant="flat"
+                        :loading="deletingMaintenanceId === log.id"
+                        :disabled="deletingMaintenanceId === log.id"
+                        @click="deleteMaintenanceLog(log)"
+                      >
+                        Dzēst
+                      </v-btn>
+                    </td>
+                  </tr>
+                </tbody>
+              </v-table>
+
+              <v-card-text v-if="!loadingMaintenance && !maintenanceLogs.length" class="text-medium-emphasis">
+                Apkopes ierakstu pagaidām nav.
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-window-item>
     </v-window>
   </v-card>
