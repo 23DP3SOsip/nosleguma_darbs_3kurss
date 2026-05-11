@@ -655,7 +655,8 @@ onMounted(async () => {
                 <v-text-field
                   v-model="maintenanceForm.mileage"
                   label="Nobraukums"
-                  type="number"
+                  type="text"
+                  inputmode="numeric"
                   variant="outlined"
                   density="comfortable"
                   class="mb-2"
@@ -664,8 +665,8 @@ onMounted(async () => {
                 <v-text-field
                   v-model="maintenanceForm.cost"
                   label="Cena"
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  inputmode="decimal"
                   variant="outlined"
                   density="comfortable"
                   class="mb-4"
