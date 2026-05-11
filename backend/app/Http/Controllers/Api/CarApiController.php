@@ -33,12 +33,16 @@ class CarApiController extends Controller
 
         $payload = $cars->map(static function (Car $car) use ($actor, $userHasActiveReservation): array {
             $activeReservation = $car->activeReservation;
-            $isAvailable = $activeReservation === null;
+            $isInMaintenance = $car->status === Car::STATUS_MAINTENANCE;
+            $isAvailable = $activeReservation === null && ! $isInMaintenance;
+            $isReserved = $activeReservation !== null;
             $ownedByCurrentUser = $activeReservation?->user_id === $actor->id;
             $canReserve = $isAvailable && ($actor->role !== 'user' || ! $userHasActiveReservation);
-            $canManageReservation = $activeReservation !== null && (
+            $canManageReservation = $isReserved && (
                 $ownedByCurrentUser || in_array($actor->role, ['admin', 'vadiba'], true)
             );
+
+            $status = $isInMaintenance ? Car::STATUS_MAINTENANCE : ($isReserved ? 'reserved' : Car::STATUS_AVAILABLE);
 
             return [
                 'id' => $car->id,
@@ -48,11 +52,16 @@ class CarApiController extends Controller
                 'plate_number' => $car->plate_number,
                 'transmission_type' => $car->transmission_type,
                 'image_url' => $car->image_url,
-                'status' => $isAvailable ? 'free' : 'reserved',
-                'status_label' => $isAvailable ? 'brīva' : 'rezervēta',
+                'status' => $status,
+                'status_label' => match ($status) {
+                    Car::STATUS_MAINTENANCE => 'Apkalpošanā',
+                    'reserved' => 'rezervēta',
+                    default => 'brīva',
+                },
                 'is_available' => $isAvailable,
                 'can_reserve' => $canReserve,
                 'can_complete' => $canManageReservation,
+                'is_under_maintenance' => $isInMaintenance,
                 'active_reservation' => $activeReservation ? [
                     'id' => $activeReservation->id,
                     'started_at' => $activeReservation->started_at?->toISOString(),
@@ -70,8 +79,9 @@ class CarApiController extends Controller
             'cars' => $payload,
             'summary' => [
                 'total' => $cars->count(),
-                'free' => $cars->filter(static fn (Car $car): bool => $car->activeReservation === null)->count(),
+                'free' => $cars->filter(static fn (Car $car): bool => $car->status === Car::STATUS_AVAILABLE && $car->activeReservation === null)->count(),
                 'reserved' => $cars->filter(static fn (Car $car): bool => $car->activeReservation !== null)->count(),
+                'maintenance' => $cars->filter(static fn (Car $car): bool => $car->status === Car::STATUS_MAINTENANCE)->count(),
             ],
         ]);
     }
@@ -86,12 +96,23 @@ class CarApiController extends Controller
             ], 401);
         }
 
+        if ($car->status === Car::STATUS_MAINTENANCE) {
+            return new JsonResponse([
+                'message' => 'Šī automašīna šobrīd ir apkalpošanā un to nevar rezervēt.',
+            ], 422);
+        }
+
         $result = DB::transaction(function () use ($actor, $car): ?JsonResponse {
             $car = Car::query()
                 ->with('activeReservation')
                 ->whereKey($car->id)
                 ->lockForUpdate()
                 ->firstOrFail();
+
+            if ($car->status === Car::STATUS_MAINTENANCE) {
+                return new JsonResponse([
+                    'message' => 'Šī automašīna šobrīd ir apkalpošanā un to nevar rezervēt.'], 422);
+            }
 
             if ($car->activeReservation) {
                 return new JsonResponse([

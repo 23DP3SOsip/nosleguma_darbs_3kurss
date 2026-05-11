@@ -65,9 +65,14 @@ const carForm = ref({
   plate_number: '',
   transmission_type: '',
   image_url: '',
+  status: 'available',
 })
 
 const transmissionTypes = ['Automātiskā', 'Manuālā']
+const carStatuses = [
+  { title: 'Pieejama', value: 'available' },
+  { title: 'Apkalpošanā', value: 'maintenance' },
+]
 
 const carOptions = computed(() => {
   return cars.value.map((car) => ({
@@ -201,6 +206,7 @@ const resetCarForm = () => {
     plate_number: '',
     transmission_type: '',
     image_url: '',
+    status: 'available',
   }
 }
 
@@ -212,6 +218,7 @@ const fillCarFormForEdit = (car) => {
     plate_number: car.plate_number,
     transmission_type: car.transmission_type,
     image_url: car.image_url || '',
+    status: car.status || 'available',
   }
 }
 
@@ -466,6 +473,19 @@ onMounted(async () => {
                   class="mb-4"
                 />
 
+                <v-select
+                  v-if="editingCarId"
+                  v-model="carForm.status"
+                  :items="carStatuses"
+                  item-title="title"
+                  item-value="value"
+                  label="Statuss"
+                  variant="outlined"
+                  density="comfortable"
+                  required
+                  class="mb-4"
+                />
+
                 <div class="d-flex ga-2 car-form-actions">
                   <v-btn
                     type="submit"
@@ -520,8 +540,8 @@ onMounted(async () => {
                     <td>{{ car.plate_number }}</td>
                     <td>{{ car.transmission_type }}</td>
                     <td>
-                      <v-chip size="small" :color="car.is_reserved ? 'error' : 'success'" variant="tonal">
-                        {{ car.is_reserved ? `Rezervēta (${car.reserved_by || 'nezināms'})` : 'Brīva' }}
+                      <v-chip size="small" :color="car.status === 'maintenance' ? 'warning' : car.is_reserved ? 'error' : 'success'" variant="tonal">
+                        {{ car.status === 'maintenance' ? 'Apkalpošanā' : car.is_reserved ? `Rezervēta (${car.reserved_by || 'nezināms'})` : 'Brīva' }}
                       </v-chip>
                     </td>
                     <td>

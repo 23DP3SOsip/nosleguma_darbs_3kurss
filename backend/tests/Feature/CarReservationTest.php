@@ -105,7 +105,41 @@ class CarReservationTest extends TestCase
         ]);
     }
 
-    private function createCar(string $plateNumber): Car
+    public function test_admin_can_set_car_to_maintenance(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $car = $this->createCar('AB-7000');
+
+        $this->actingWithApiToken($admin)
+            ->putJson('/api/admin/cars/'.$car->id, [
+                'brand' => $car->brand,
+                'model' => $car->model,
+                'plate_number' => $car->plate_number,
+                'transmission_type' => $car->transmission_type,
+                'image_url' => $car->image_url,
+                'status' => Car::STATUS_MAINTENANCE,
+            ])
+            ->assertOk()
+            ->assertJson(['message' => 'Automašīna veiksmīgi atjaunota.']);
+
+        $this->assertDatabaseHas('cars', [
+            'id' => $car->id,
+            'status' => Car::STATUS_MAINTENANCE,
+        ]);
+    }
+
+    public function test_car_in_maintenance_cannot_be_reserved(): void
+    {
+        $user = User::factory()->create(['role' => 'user']);
+        $car = $this->createCar('AB-8000', Car::STATUS_MAINTENANCE);
+
+        $this->actingWithApiToken($user)
+            ->postJson('/api/cars/'.$car->id.'/reserve')
+            ->assertStatus(422)
+            ->assertJson(['message' => 'Šī automašīna šobrīd ir apkalpošanā un to nevar rezervēt.']);
+    }
+
+    private function createCar(string $plateNumber, string $status = Car::STATUS_AVAILABLE): Car
     {
         return Car::query()->create([
             'brand' => 'Test',
@@ -113,6 +147,7 @@ class CarReservationTest extends TestCase
             'plate_number' => $plateNumber,
             'transmission_type' => 'Automātiskā',
             'image_url' => 'https://example.com/car.jpg',
+            'status' => $status,
         ]);
     }
 

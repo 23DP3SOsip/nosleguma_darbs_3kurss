@@ -13,8 +13,9 @@ const successMessage = ref('')
 
 const summary = computed(() => ({
   total: cars.value.length,
-  free: cars.value.filter((car) => car.is_available).length,
-  reserved: cars.value.filter((car) => !car.is_available).length,
+  free: cars.value.filter((car) => car.status === 'available').length,
+  reserved: cars.value.filter((car) => car.status === 'reserved').length,
+  maintenance: cars.value.filter((car) => car.status === 'maintenance').length,
 }))
 
 const roleLabel = (role) => {
@@ -93,6 +94,10 @@ onMounted(loadCars)
             <div class="summary-value">{{ summary.reserved }}</div>
             <div class="summary-label">Rezervētas</div>
           </v-card>
+          <v-card class="summary-card warning" rounded="xl" elevation="0">
+            <div class="summary-value">{{ summary.maintenance }}</div>
+            <div class="summary-label">Apkalpošanā</div>
+          </v-card>
         </div>
       </div>
     </v-sheet>
@@ -111,7 +116,11 @@ onMounted(loadCars)
         <v-card class="car-card d-flex flex-column w-100" rounded="xl" elevation="10">
           <v-img :src="car.image_url" height="230" cover class="car-image">
             <div class="car-image-overlay">
-              <v-chip :color="car.is_available ? 'success' : 'error'" variant="flat" size="small">
+              <v-chip
+                :color="car.status === 'maintenance' ? 'warning' : car.status === 'reserved' ? 'error' : 'success'"
+                variant="flat"
+                size="small"
+              >
                 {{ car.status_label }}
               </v-chip>
             </div>
@@ -147,6 +156,10 @@ onMounted(loadCars)
               </div>
             </div>
 
+            <div v-else-if="car.status === 'maintenance'" class="text-body-2 text-medium-emphasis">
+              Šis automobilis šobrīd ir apkalpošanā un rezervācijai nav pieejams.
+            </div>
+
             <div v-else class="text-body-2 text-medium-emphasis">
               Šis automobilis šobrīd ir brīvs un pieejams rezervācijai.
             </div>
@@ -156,7 +169,7 @@ onMounted(loadCars)
 
           <v-card-actions class="px-4 pb-4 pt-0">
             <v-btn
-              v-if="car.is_available"
+              v-if="car.status === 'available'"
               color="primary"
               variant="flat"
               block
@@ -167,7 +180,7 @@ onMounted(loadCars)
               Rezervēt
             </v-btn>
 
-            <template v-else>
+            <template v-else-if="car.status === 'reserved'">
               <v-btn
                 v-if="car.can_complete"
                 color="success"
@@ -180,7 +193,7 @@ onMounted(loadCars)
             </template>
           </v-card-actions>
 
-          <v-card-actions v-if="car.is_available && !car.can_reserve" class="px-4 pb-4 pt-0">
+          <v-card-actions v-if="car.status === 'available' && !car.can_reserve" class="px-4 pb-4 pt-0">
             <v-alert type="warning" variant="tonal" density="compact" class="w-100 mb-0">
               Jums jau ir aktīva rezervācija.
             </v-alert>
@@ -253,6 +266,10 @@ onMounted(loadCars)
 
 .summary-card.danger {
   background: rgba(210, 25, 34, 0.16);
+}
+
+.summary-card.warning {
+  background: rgba(255, 193, 7, 0.18);
 }
 
 .summary-value {

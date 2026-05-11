@@ -11,6 +11,11 @@ use Illuminate\Validation\Rule;
 
 class AdminCarApiController extends Controller
 {
+    private const CAR_STATUSES = [
+        Car::STATUS_AVAILABLE,
+        Car::STATUS_MAINTENANCE,
+    ];
+
     public function index(Request $request): JsonResponse
     {
         $actor = $request->user();
@@ -36,6 +41,8 @@ class AdminCarApiController extends Controller
                     'plate_number' => $car->plate_number,
                     'transmission_type' => $car->transmission_type,
                     'image_url' => $car->image_url,
+                    'status' => $car->status ?? Car::STATUS_AVAILABLE,
+                    'status_label' => $car->status === Car::STATUS_MAINTENANCE ? 'Apkalpošanā' : 'Pieejama',
                     'is_reserved' => $activeReservation !== null,
                     'reserved_by' => $activeReservation?->user?->name,
                     'reserved_from' => $activeReservation?->started_at?->toISOString(),
@@ -74,6 +81,8 @@ class AdminCarApiController extends Controller
             'image_url.url' => 'Ievadiet derīgu attēla URL adresi.',
         ]);
 
+        $validated['status'] = Car::STATUS_AVAILABLE;
+
         $car = Car::query()->create($validated);
 
         return new JsonResponse([
@@ -98,6 +107,7 @@ class AdminCarApiController extends Controller
             'plate_number' => ['required', 'string', 'max:50', Rule::unique('cars', 'plate_number')->ignore($car->id)],
             'transmission_type' => ['required', Rule::in(['Automātiskā', 'Manuālā'])],
             'image_url' => ['nullable', 'url', 'max:2048'],
+            'status' => ['required', Rule::in(self::CAR_STATUSES)],
         ], [
             'brand.required' => 'Lauks "Zīmols" ir obligāts.',
             'model.required' => 'Lauks "Modelis" ir obligāts.',
@@ -106,7 +116,22 @@ class AdminCarApiController extends Controller
             'transmission_type.required' => 'Lauks "Ātrumkārba" ir obligāts.',
             'transmission_type.in' => 'Ātrumkārbas tipam jābūt "Automātiskā" vai "Manuālā".',
             'image_url.url' => 'Ievadiet derīgu attēla URL adresi.',
+            'status.required' => 'Lauks "Statuss" ir obligāts.',
+            'status.in' => 'Statusam jābūt "Pieejama" vai "Apkalpošanā".',
         ]);
+
+        if (($validated['status'] ?? Car::STATUS_AVAILABLE) === Car::STATUS_MAINTENANCE) {
+            $hasActiveReservation = CarReservation::query()
+                ->where('car_id', $car->id)
+                ->where('status', CarReservation::STATUS_ACTIVE)
+                ->exists();
+
+            if ($hasActiveReservation) {
+                return new JsonResponse([
+                    'message' => 'Nevar pārvietot automašīnu uz apkalpošanu, kamēr tai ir aktīva rezervācija.',
+                ], 422);
+            }
+        }
 
         $car->update($validated);
 

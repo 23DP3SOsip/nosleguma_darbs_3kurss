@@ -11,12 +11,17 @@ class Car extends Model
 {
     use HasFactory;
 
+    public const STATUS_AVAILABLE = 'available';
+
+    public const STATUS_MAINTENANCE = 'maintenance';
+
     protected $fillable = [
         'brand',
         'model',
         'plate_number',
         'transmission_type',
         'image_url',
+        'status',
     ];
 
     public function activeReservation(): HasOne
