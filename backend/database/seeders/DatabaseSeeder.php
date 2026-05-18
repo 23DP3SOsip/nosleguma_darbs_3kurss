@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
                 'id'         => 1,
                 'name'       => 'vadiba',
                 'email'      => 'vadiba@example.com',
-                'password'   => '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // Vadiba123!
+                'password'   => '$2y$12$j/UXpOxMDwZtpni8nK6HiuaqdqHrjtAvtHL0f2I/TgRDCOpXy1/wW', // Vadiba123!
                 'role'       => 'vadiba',
                 'created_by' => null,
                 'api_token'  => null,
@@ -36,10 +36,10 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => '2025-04-15 10:00:00',
             ],
             [
-                'id'         => 2,
+                'id'         => 3,
                 'name'       => 'sanders',
-                'email'      => 'sanders@example.com',
-                'password'   => '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // Sanders123!
+                'email'      => 'test@test.com',
+                'password'   => '$2y$12$IqCyluKcdZ7wAXRZwgSyfOA5kjxGwAYw2F8pED0p8RottCRvUvhc2', // Sanders123!
                 'role'       => 'user',
                 'created_by' => 1,
                 'api_token'  => null,
@@ -47,10 +47,10 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => '2025-04-15 10:05:00',
             ],
             [
-                'id'         => 3,
+                'id'         => 4,
                 'name'       => 'admin',
-                'email'      => 'admin@example.com',
-                'password'   => '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // Admin123!
+                'email'      => 'admin@test.com',
+                'password'   => '$2y$12$Foh82YhNStSUJlRgRCDLN.dcv.Y.mqejWTYLmzIybPxln8D50DrQy', // Admin123!
                 'role'       => 'admin',
                 'created_by' => 1,
                 'api_token'  => null,
@@ -58,10 +58,10 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => '2025-04-15 10:10:00',
             ],
             [
-                'id'         => 4,
+                'id'         => 5,
                 'name'       => 'mushket',
-                'email'      => 'mushket@example.com',
-                'password'   => '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // Mushket123!
+                'email'      => 'mushket@test.com',
+                'password'   => '$2y$12$0IIzORZASfEUwQ21S8kUE.uSxQXxGgQAgssICP4TQNzXYoazdXBgS', // Mushket123!
                 'role'       => 'user',
                 'created_by' => 1,
                 'api_token'  => null,
@@ -152,28 +152,28 @@ class DatabaseSeeder extends Seeder
         // ----------------------------------------------------------------
         $reservations = [
             // Car 1 – Toyota Corolla
-            ['id' =>  1, 'car_id' => 1, 'user_id' => 2, 'status' => 'completed', 'started_at' => '2025-01-05 08:00:00', 'ended_at' => '2025-01-07 18:00:00', 'created_at' => '2025-01-04 12:00:00', 'updated_at' => '2025-01-07 18:00:00'],
-            ['id' =>  2, 'car_id' => 1, 'user_id' => 4, 'status' => 'completed', 'started_at' => '2025-01-20 09:00:00', 'ended_at' => '2025-01-22 17:00:00', 'created_at' => '2025-01-19 10:00:00', 'updated_at' => '2025-01-22 17:00:00'],
-            ['id' =>  3, 'car_id' => 1, 'user_id' => 2, 'status' => 'completed', 'started_at' => '2025-02-10 08:00:00', 'ended_at' => '2025-02-12 18:00:00', 'created_at' => '2025-02-09 11:00:00', 'updated_at' => '2025-02-12 18:00:00'],
-            ['id' =>  4, 'car_id' => 1, 'user_id' => 4, 'status' => 'active',    'started_at' => '2025-04-20 08:00:00', 'ended_at' => null,                   'created_at' => '2025-04-19 09:00:00', 'updated_at' => '2025-04-20 08:00:00'],
+            ['id' =>  1, 'car_id' => 1, 'user_id' => 3, 'status' => 'completed', 'started_at' => '2025-01-05 08:00:00', 'ended_at' => '2025-01-07 18:00:00', 'created_at' => '2025-01-04 12:00:00', 'updated_at' => '2025-01-07 18:00:00'],
+            ['id' =>  2, 'car_id' => 1, 'user_id' => 5, 'status' => 'completed', 'started_at' => '2025-01-20 09:00:00', 'ended_at' => '2025-01-22 17:00:00', 'created_at' => '2025-01-19 10:00:00', 'updated_at' => '2025-01-22 17:00:00'],
+            ['id' =>  3, 'car_id' => 1, 'user_id' => 3, 'status' => 'completed', 'started_at' => '2025-02-10 08:00:00', 'ended_at' => '2025-02-12 18:00:00', 'created_at' => '2025-02-09 11:00:00', 'updated_at' => '2025-02-12 18:00:00'],
+            ['id' =>  4, 'car_id' => 1, 'user_id' => 5, 'status' => 'active',    'started_at' => '2025-04-20 08:00:00', 'ended_at' => null,                   'created_at' => '2025-04-19 09:00:00', 'updated_at' => '2025-04-20 08:00:00'],
 
             // Car 2 – Volkswagen Passat
-            ['id' =>  5, 'car_id' => 2, 'user_id' => 2, 'status' => 'completed', 'started_at' => '2025-01-15 10:00:00', 'ended_at' => '2025-01-17 16:00:00', 'created_at' => '2025-01-14 08:00:00', 'updated_at' => '2025-01-17 16:00:00'],
-            ['id' =>  6, 'car_id' => 2, 'user_id' => 4, 'status' => 'completed', 'started_at' => '2025-02-01 09:00:00', 'ended_at' => '2025-02-03 17:00:00', 'created_at' => '2025-01-31 10:00:00', 'updated_at' => '2025-02-03 17:00:00'],
-            ['id' =>  7, 'car_id' => 2, 'user_id' => 2, 'status' => 'completed', 'started_at' => '2025-03-05 08:00:00', 'ended_at' => '2025-03-07 18:00:00', 'created_at' => '2025-03-04 09:00:00', 'updated_at' => '2025-03-07 18:00:00'],
-            ['id' =>  8, 'car_id' => 2, 'user_id' => 4, 'status' => 'active',    'started_at' => '2025-04-22 10:00:00', 'ended_at' => null,                   'created_at' => '2025-04-21 11:00:00', 'updated_at' => '2025-04-22 10:00:00'],
+            ['id' =>  5, 'car_id' => 2, 'user_id' => 3, 'status' => 'completed', 'started_at' => '2025-01-15 10:00:00', 'ended_at' => '2025-01-17 16:00:00', 'created_at' => '2025-01-14 08:00:00', 'updated_at' => '2025-01-17 16:00:00'],
+            ['id' =>  6, 'car_id' => 2, 'user_id' => 5, 'status' => 'completed', 'started_at' => '2025-02-01 09:00:00', 'ended_at' => '2025-02-03 17:00:00', 'created_at' => '2025-01-31 10:00:00', 'updated_at' => '2025-02-03 17:00:00'],
+            ['id' =>  7, 'car_id' => 2, 'user_id' => 3, 'status' => 'completed', 'started_at' => '2025-03-05 08:00:00', 'ended_at' => '2025-03-07 18:00:00', 'created_at' => '2025-03-04 09:00:00', 'updated_at' => '2025-03-07 18:00:00'],
+            ['id' =>  8, 'car_id' => 2, 'user_id' => 5, 'status' => 'active',    'started_at' => '2025-04-22 10:00:00', 'ended_at' => null,                   'created_at' => '2025-04-21 11:00:00', 'updated_at' => '2025-04-22 10:00:00'],
 
             // Car 3 – Skoda Octavia
-            ['id' =>  9, 'car_id' => 3, 'user_id' => 2, 'status' => 'completed', 'started_at' => '2025-01-25 08:00:00', 'ended_at' => '2025-01-27 17:00:00', 'created_at' => '2025-01-24 10:00:00', 'updated_at' => '2025-01-27 17:00:00'],
-            ['id' => 10, 'car_id' => 3, 'user_id' => 4, 'status' => 'completed', 'started_at' => '2025-02-15 09:00:00', 'ended_at' => '2025-02-17 18:00:00', 'created_at' => '2025-02-14 08:00:00', 'updated_at' => '2025-02-17 18:00:00'],
-            ['id' => 11, 'car_id' => 3, 'user_id' => 2, 'status' => 'completed', 'started_at' => '2025-03-10 08:00:00', 'ended_at' => '2025-03-12 17:00:00', 'created_at' => '2025-03-09 09:00:00', 'updated_at' => '2025-03-12 17:00:00'],
-            ['id' => 12, 'car_id' => 3, 'user_id' => 4, 'status' => 'active',    'started_at' => '2025-04-25 09:00:00', 'ended_at' => null,                   'created_at' => '2025-04-24 10:00:00', 'updated_at' => '2025-04-25 09:00:00'],
+            ['id' =>  9, 'car_id' => 3, 'user_id' => 3, 'status' => 'completed', 'started_at' => '2025-01-25 08:00:00', 'ended_at' => '2025-01-27 17:00:00', 'created_at' => '2025-01-24 10:00:00', 'updated_at' => '2025-01-27 17:00:00'],
+            ['id' => 10, 'car_id' => 3, 'user_id' => 5, 'status' => 'completed', 'started_at' => '2025-02-15 09:00:00', 'ended_at' => '2025-02-17 18:00:00', 'created_at' => '2025-02-14 08:00:00', 'updated_at' => '2025-02-17 18:00:00'],
+            ['id' => 11, 'car_id' => 3, 'user_id' => 3, 'status' => 'completed', 'started_at' => '2025-03-10 08:00:00', 'ended_at' => '2025-03-12 17:00:00', 'created_at' => '2025-03-09 09:00:00', 'updated_at' => '2025-03-12 17:00:00'],
+            ['id' => 12, 'car_id' => 3, 'user_id' => 5, 'status' => 'active',    'started_at' => '2025-04-25 09:00:00', 'ended_at' => null,                   'created_at' => '2025-04-24 10:00:00', 'updated_at' => '2025-04-25 09:00:00'],
 
             // Car 4 – BMW 320d
-            ['id' => 13, 'car_id' => 4, 'user_id' => 2, 'status' => 'completed', 'started_at' => '2025-02-05 08:00:00', 'ended_at' => '2025-02-07 18:00:00', 'created_at' => '2025-02-04 09:00:00', 'updated_at' => '2025-02-07 18:00:00'],
-            ['id' => 14, 'car_id' => 4, 'user_id' => 4, 'status' => 'completed', 'started_at' => '2025-03-01 09:00:00', 'ended_at' => '2025-03-03 17:00:00', 'created_at' => '2025-02-28 10:00:00', 'updated_at' => '2025-03-03 17:00:00'],
-            ['id' => 15, 'car_id' => 4, 'user_id' => 2, 'status' => 'completed', 'started_at' => '2025-03-20 08:00:00', 'ended_at' => '2025-03-22 18:00:00', 'created_at' => '2025-03-19 09:00:00', 'updated_at' => '2025-03-22 18:00:00'],
-            ['id' => 16, 'car_id' => 4, 'user_id' => 4, 'status' => 'active',    'started_at' => '2025-04-28 10:00:00', 'ended_at' => null,                   'created_at' => '2025-04-27 11:00:00', 'updated_at' => '2025-04-28 10:00:00'],
+            ['id' => 13, 'car_id' => 4, 'user_id' => 3, 'status' => 'completed', 'started_at' => '2025-02-05 08:00:00', 'ended_at' => '2025-02-07 18:00:00', 'created_at' => '2025-02-04 09:00:00', 'updated_at' => '2025-02-07 18:00:00'],
+            ['id' => 14, 'car_id' => 4, 'user_id' => 5, 'status' => 'completed', 'started_at' => '2025-03-01 09:00:00', 'ended_at' => '2025-03-03 17:00:00', 'created_at' => '2025-02-28 10:00:00', 'updated_at' => '2025-03-03 17:00:00'],
+            ['id' => 15, 'car_id' => 4, 'user_id' => 3, 'status' => 'completed', 'started_at' => '2025-03-20 08:00:00', 'ended_at' => '2025-03-22 18:00:00', 'created_at' => '2025-03-19 09:00:00', 'updated_at' => '2025-03-22 18:00:00'],
+            ['id' => 16, 'car_id' => 4, 'user_id' => 5, 'status' => 'active',    'started_at' => '2025-04-28 10:00:00', 'ended_at' => null,                   'created_at' => '2025-04-27 11:00:00', 'updated_at' => '2025-04-28 10:00:00'],
         ];
 
         foreach ($reservations as $reservation) {
@@ -191,7 +191,7 @@ class DatabaseSeeder extends Seeder
             [
                 'id'               => 1,
                 'car_id'           => 5,
-                'user_id'          => 3,
+                'user_id'          => 4,
                 'maintenance_type' => 'Eļļas maiņa',
                 'description'      => 'Veikta eļļas un eļļas filtra maiņa. Nomainīts arī gaisa filtrs.',
                 'performed_at'     => '2025-04-10 10:00:00',
@@ -203,7 +203,7 @@ class DatabaseSeeder extends Seeder
             [
                 'id'               => 2,
                 'car_id'           => 5,
-                'user_id'          => 3,
+                'user_id'          => 4,
                 'maintenance_type' => 'Bremžu pārbaude',
                 'description'      => 'Veikta bremžu sistēmas pilna pārbaude. Nomainīti priekšējie bremžu diski un kluči.',
                 'performed_at'     => '2025-04-18 14:00:00',
