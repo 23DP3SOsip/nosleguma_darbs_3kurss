@@ -14,5 +14,8 @@
     "libpq-dev",
     "libonig-dev",
     "gettext"
-  ]
+  ],
+  "deploy": {
+    "preDeploy": "php artisan migrate --force && php artisan optimize:clear"
+  }
 }
