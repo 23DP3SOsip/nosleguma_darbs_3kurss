@@ -133,6 +133,75 @@ class AdminUserApiController extends Controller
         ]);
     }
 
+    public function update(Request $request, User $user): JsonResponse
+    {
+        $actor = $request->user();
+
+        if (! $actor) {
+            return new JsonResponse([
+                'message' => 'Nepieciešama autorizācija.',
+            ], 401);
+        }
+
+        if ($actor->id === $user->id) {
+            return new JsonResponse([
+                'message' => 'Jūs nevarat rediģēt pats sevi šajā sadaļā.',
+            ], 422);
+        }
+
+        if ($actor->role === 'admin' && $user->role !== 'user') {
+            return new JsonResponse([
+                'message' => 'Kā admin jūs varat rediģēt tikai lietotājus ar lomu user.',
+            ], 403);
+        }
+
+        if (! in_array($actor->role, ['admin', 'vadiba'], true)) {
+            return new JsonResponse([
+                'message' => 'Jums nav tiesību rediģēt lietotājus.'], 403);
+        }
+
+        $allowedRoles = $this->allowedUpdateRoles($actor->role, $user->role);
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'password' => ['nullable', 'string', 'min:8'],
+            'role' => ['required', Rule::in($allowedRoles)],
+        ], [
+            'name.required' => 'Lauks "Vārds" ir obligāts.',
+            'name.max' => 'Lauks "Vārds" nedrīkst būt garāks par 255 simboliem.',
+            'email.required' => 'Lauks "E-pasts" ir obligāts.',
+            'email.email' => 'Ievadiet derīgu e-pasta adresi.',
+            'email.max' => 'Lauks "E-pasts" nedrīkst būt garāks par 255 simboliem.',
+            'email.unique' => 'Šis e-pasts jau tiek izmantots.',
+            'password.min' => 'Parolei jābūt vismaz 8 simbolus garai.',
+            'role.required' => 'Izvēlieties lietotāja lomu.',
+            'role.in' => 'Izvēlētā loma nav atļauta.',
+        ]);
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->role = $validated['role'];
+
+        if (! empty($validated['password'])) {
+            $user->password = $validated['password'];
+        }
+
+        $user->save();
+
+        return new JsonResponse([
+            'message' => 'Lietotājs veiksmīgi atjaunots.',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'created_by' => $user->created_by,
+                'created_at' => $user->created_at,
+            ],
+        ]);
+    }
+
     /**
      * @return array<int, string>
      */
@@ -142,6 +211,18 @@ class AdminUserApiController extends Controller
             'vadiba' => ['admin', 'user'],
             'admin' => ['user'],
             default => [],
+        };
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function allowedUpdateRoles(string $actorRole, string $targetRole): array
+    {
+        return match ($actorRole) {
+            'vadiba' => ['admin', 'user', 'vadiba'],
+            'admin' => $targetRole === 'user' ? ['user'] : [$targetRole],
+            default => [$targetRole],
         };
     }
 

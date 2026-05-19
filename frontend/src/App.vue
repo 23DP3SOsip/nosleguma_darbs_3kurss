@@ -9,6 +9,7 @@ const authStore = useAuthStore()
 
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const canOpenAdmin = computed(() => authStore.canOpenAdminPanel)
+const currentYear = new Date().getFullYear()
 const roleLabel = computed(() => {
   return (
     {
@@ -27,7 +28,7 @@ const logout = async () => {
 
 <template>
   <v-app>
-    <v-app-bar v-if="isAuthenticated" flat color="white">
+    <v-app-bar v-if="isAuthenticated" flat color="surface" class="app-header">
       <v-container class="d-flex align-center ga-2">
         <v-btn variant="text" :to="{ name: 'home' }">Sākums</v-btn>
         <v-btn v-if="canOpenAdmin" variant="text" :to="{ name: 'admin' }">Admin panelis</v-btn>
@@ -42,6 +43,16 @@ const logout = async () => {
         <RouterView />
       </v-container>
     </v-main>
+
+    <v-footer class="app-footer py-4" color="surface" border>
+      <v-container class="d-flex flex-column flex-md-row align-center justify-space-between ga-3">
+        <div class="footer-copy text-body-2">
+          © {{ currentYear }} Autoparka rezervācijas sistēma. Visas tiesības aizsargātas.
+        </div>
+
+        <div class="footer-links text-body-2 text-medium-emphasis">Atbalsts: A230309SO@rvt.lv</div>
+      </v-container>
+    </v-footer>
   </v-app>
 </template>
 

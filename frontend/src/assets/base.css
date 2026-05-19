@@ -4,9 +4,9 @@
   --vt-c-white-soft: #f8f8f8;
   --vt-c-white-mute: #f2f2f2;
 
-  --vt-c-black: #181818;
-  --vt-c-black-soft: #222222;
-  --vt-c-black-mute: #282828;
+  --vt-c-black: #0b0b0b;
+  --vt-c-black-soft: #141414;
+  --vt-c-black-mute: #1a1a1a;
 
   --vt-c-indigo: #2c3e50;
 
@@ -15,23 +15,26 @@
   --vt-c-divider-dark-1: rgba(84, 84, 84, 0.65);
   --vt-c-divider-dark-2: rgba(84, 84, 84, 0.48);
 
-  --vt-c-text-light-1: var(--vt-c-indigo);
-  --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
+  --vt-c-text-light-1: #d0d0d0; /* light gray heading */
+  --vt-c-text-light-2: rgba(208, 208, 208, 0.9);
   --vt-c-text-dark-1: var(--vt-c-white);
-  --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+  --vt-c-text-dark-2: rgba(208, 208, 208, 0.8);
 }
 
 /* semantic color variables for this project */
 :root {
-  --color-background: var(--vt-c-white);
-  --color-background-soft: var(--vt-c-white-soft);
-  --color-background-mute: var(--vt-c-white-mute);
+  --color-background: var(--vt-c-black);
+  --color-background-soft: var(--vt-c-black-soft);
+  --color-background-mute: var(--vt-c-black-mute);
 
-  --color-border: var(--vt-c-divider-light-2);
-  --color-border-hover: var(--vt-c-divider-light-1);
+  --color-border: rgba(100,100,100,0.28);
+  --color-border-hover: rgba(150,150,150,0.18);
 
   --color-heading: var(--vt-c-text-light-1);
-  --color-text: var(--vt-c-text-light-1);
+  --color-text: var(--vt-c-text-light-2);
+
+  --accent-gold: #FFC107;
+  --accent-gold-soft: rgba(255,193,7,0.12);
 
   --section-gap: 160px;
 }
@@ -48,6 +51,43 @@
     --color-heading: var(--vt-c-text-dark-1);
     --color-text: var(--vt-c-text-dark-2);
   }
+}
+
+/* Header / app-bar styling */
+.v-app-bar.app-header {
+  background: linear-gradient(90deg, var(--color-background-soft), var(--color-background));
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.v-app-bar.app-header .v-btn--text {
+  color: var(--accent-gold);
+}
+
+.v-app-bar.app-header .text-body-2 {
+  color: var(--color-text);
+}
+
+.app-footer {
+  background: linear-gradient(90deg, var(--color-background-soft), var(--color-background));
+  color: var(--color-text);
+  border-top: 1px solid var(--color-border);
+}
+
+.footer-copy {
+  color: var(--color-text);
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-separator {
+  color: var(--accent-gold);
 }
 
 *,

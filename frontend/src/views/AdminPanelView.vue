@@ -22,6 +22,11 @@ const savingUser = ref(false)
 const deletingId = ref(null)
 const userErrorMessage = ref('')
 const userSuccessMessage = ref('')
+const editingUserId = ref(null)
+const editingUser = ref({ name: '', email: '', role: '', password: '' })
+const editingUserOriginalRole = ref('')
+const editingUserIsVadiba = ref(false)
+const savingEditedUser = ref(false)
 // Users search & sort
 const usersSearchQuery = ref('')
 const usersSortKey = ref('id')
@@ -330,6 +335,66 @@ const deleteUser = async (user) => {
     deletingId.value = null
   }
 }
+
+const fillEditUserForm = (user) => {
+  editingUserId.value = user.id
+  editingUser.value = {
+    name: user.name || '',
+    email: user.email || '',
+    role: user.role || '',
+    password: '',
+  }
+  editingUserIsVadiba.value = user.role === 'vadiba'
+  editingUserOriginalRole.value = user.role || ''
+}
+
+const resetEditUserForm = () => {
+  editingUserId.value = null
+  editingUser.value = { name: '', email: '', role: '', password: '' }
+}
+
+const saveEditedUser = async () => {
+  if (!editingUserId.value) return
+  savingEditedUser.value = true
+  userErrorMessage.value = ''
+  userSuccessMessage.value = ''
+
+  try {
+    // determine final role to send
+    const finalRole = (() => {
+      // never allow changing vadiba
+      if (editingUserIsVadiba.value) return 'vadiba'
+      // if current user is admin and original role was admin or vadiba, preserve original
+      if (authStore.role === 'admin' && (editingUserOriginalRole.value === 'admin' || editingUserOriginalRole.value === 'vadiba')) {
+        return editingUserOriginalRole.value
+      }
+      return editingUser.value.role
+    })()
+
+    const payload = {
+      name: editingUser.value.name,
+      email: editingUser.value.email,
+      role: finalRole,
+    }
+
+    if (editingUser.value.password) payload.password = editingUser.value.password
+
+    await api.put(`/api/admin/users/${editingUserId.value}`, payload)
+    userSuccessMessage.value = 'Lietotāja dati veiksmīgi atjaunināti.'
+    resetEditUserForm()
+    await loadUsers()
+  } catch (error) {
+    userErrorMessage.value = error.response?.data?.message || 'Neizdevās saglabāt lietotāju.'
+  } finally {
+    savingEditedUser.value = false
+  }
+}
+
+const editingRoleEditable = computed(() => {
+  if (editingUserIsVadiba.value) return false
+  if (authStore.role === 'admin' && (editingUserOriginalRole.value === 'admin' || editingUserOriginalRole.value === 'vadiba')) return false
+  return true
+})
 
 const loadCars = async () => {
   loadingCars.value = true
@@ -718,18 +783,30 @@ onMounted(async () => {
                     <td>{{ user.created_by_name || '-' }}</td>
                     <td>{{ user.created_at ? new Date(user.created_at).toLocaleString('lv-LV') : '-' }}</td>
                     <td>
-                      <v-btn
-                        v-if="canDelete(user.role)"
-                        color="error"
-                        size="small"
-                        variant="flat"
-                        :loading="deletingId === user.id"
-                        :disabled="deletingId === user.id"
-                        @click="deleteUser(user)"
-                      >
-                        Dzēst
-                      </v-btn>
-                      <span v-else class="text-medium-emphasis">Nav atļauts</span>
+                      <div class="d-flex ga-2">
+                          <v-btn
+                            v-if="!(authStore.role === 'admin' && (user.role === 'admin' || user.role === 'vadiba'))"
+                            size="small"
+                            color="primary"
+                            variant="flat"
+                            @click="fillEditUserForm(user)"
+                          >
+                            Rediģēt
+                          </v-btn>
+
+                        <v-btn
+                          v-if="canDelete(user.role)"
+                          color="error"
+                          size="small"
+                          variant="flat"
+                          :loading="deletingId === user.id"
+                          :disabled="deletingId === user.id"
+                          @click="deleteUser(user)"
+                        >
+                          Dzēst
+                        </v-btn>
+                        <span v-else class="text-medium-emphasis">Nav atļauts</span>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -738,6 +815,37 @@ onMounted(async () => {
           </v-col>
         </v-row>
       </v-window-item>
+
+      <!-- Edit user dialog -->
+      <v-dialog v-model="editingUserId" persistent max-width="560">
+        <v-card>
+          <v-card-title>Rediģēt lietotāju</v-card-title>
+          <v-card-text>
+            <v-form @submit.prevent="saveEditedUser">
+              <v-text-field v-model="editingUser.name" label="Vārds" required class="mb-2" />
+              <v-text-field v-model="editingUser.email" label="E-pasts" type="email" required class="mb-2" />
+
+              <v-select
+                v-model="editingUser.role"
+                :items="allowedRoles"
+                label="Loma"
+                required
+                class="mb-2"
+                :disabled="!editingRoleEditable"
+              />
+              <div v-if="!editingRoleEditable && editingUserIsVadiba" class="text-caption text-medium-emphasis mb-2">Lomas rediģēšana nav atļauta vadībai.</div>
+              <div v-else-if="!editingRoleEditable && authStore.role === 'admin'" class="text-caption text-medium-emphasis mb-2">Kā admin, jūs nevarat mainīt lietotājus ar lomām admin vai vadiba.</div>
+
+              <v-text-field v-model="editingUser.password" label="Parole (atstāt tukšu, ja nemainīt)" type="password" class="mb-4" />
+
+              <div class="d-flex justify-end ga-2">
+                <v-btn color="secondary" variant="tonal" @click="resetEditUserForm">Atcelt</v-btn>
+                <v-btn color="primary" :loading="savingEditedUser" type="submit">Saglabāt</v-btn>
+              </div>
+            </v-form>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
 
       <v-window-item value="cars">
         <v-row>

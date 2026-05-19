@@ -308,10 +308,10 @@ onMounted(loadCars)
 
 .hero-shell {
   background:
-    radial-gradient(circle at top right, rgba(210, 25, 34, 0.18), transparent 30%),
-    linear-gradient(135deg, rgba(17, 24, 39, 0.92), rgba(31, 41, 55, 0.9));
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+    radial-gradient(circle at top right, var(--accent-gold-soft), transparent 30%),
+    linear-gradient(135deg, var(--color-background), var(--color-background-soft));
+  color: var(--color-text);
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .hero-grid {
@@ -345,22 +345,23 @@ onMounted(loadCars)
 }
 
 .summary-card {
-  background: rgba(255, 255, 255, 0.08);
-  color: white;
-  padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--color-background-soft);
+  color: var(--color-text);
+  padding: 18px;
+  border: 1px solid var(--color-border);
 }
 
 .summary-card.success {
-  background: rgba(76, 175, 80, 0.16);
+  background: rgba(120, 120, 120, 0.06);
 }
 
 .summary-card.danger {
-  background: rgba(210, 25, 34, 0.16);
+  background: rgba(120, 120, 120, 0.06);
 }
 
 .summary-card.warning {
-  background: rgba(255, 193, 7, 0.18);
+  background: var(--accent-gold-soft);
+  border-color: rgba(255,193,7,0.22);
 }
 
 .summary-value {
@@ -376,7 +377,7 @@ onMounted(loadCars)
 
 .car-card {
   overflow: hidden;
-  background: linear-gradient(180deg, #ffffff, #fbfbfd);
+  background: linear-gradient(180deg, var(--color-background-soft), var(--color-background));
 }
 
 .car-image {
@@ -394,19 +395,19 @@ onMounted(loadCars)
   justify-content: space-between;
   gap: 16px;
   padding: 5px 0;
-  color: rgba(0, 0, 0, 0.72);
+  color: var(--color-text);
 }
 
 .info-row strong {
-  color: rgba(0, 0, 0, 0.9);
+  color: var(--color-text);
   text-align: right;
 }
 
 .reservation-box {
   padding: 14px;
   border-radius: 16px;
-  background: rgba(210, 25, 34, 0.06);
-  border: 1px solid rgba(210, 25, 34, 0.12);
+  background: rgba(255,193,7,0.04);
+  border: 1px solid rgba(255,193,7,0.12);
 }
 
 @media (max-width: 960px) {

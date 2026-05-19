@@ -8,17 +8,23 @@ export default createVuetify({
   components,
   directives,
   theme: {
-    defaultTheme: 'light',
+    defaultTheme: 'dark',
     themes: {
-      light: {
+      dark: {
         colors: {
-          primary: '#d21922',
-          secondary: '#424242',
-          accent: '#82B1FF',
-          error: '#FF5252',
-          info: '#2196F3',
-          success: '#4CAF50',
-          warning: '#FB8C00',
+          background: '#0b0b0b',
+          surface: '#141414',
+          'surface-bright': '#1f1f1f',
+          primary: '#FFC107',
+          secondary: '#B8860B',
+          accent: '#FFD54F',
+          error: '#CF6679',
+          info: '#90CAF9',
+          success: '#81C784',
+          warning: '#FFB300',
+          // on-surface / text color (light gray)
+          'on-surface': '#d0d0d0',
+          'on-surface-variant': '#cfcfcf',
         },
       },
     },
