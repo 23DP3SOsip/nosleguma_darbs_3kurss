@@ -37,7 +37,17 @@ const savingMaintenance = ref(false)
 const deletingMaintenanceId = ref(null)
 const maintenanceErrorMessage = ref('')
 const maintenanceSuccessMessage = ref('')
-const maintenanceTypes = ['TO', 'Plānotā apkope', 'Remonts', 'Diagnostika']
+const maintenanceTypes = [
+  'Tehniskā apkope',
+  'Plānotā apkope',
+  'Remonts',
+  'Diagnostika',
+  'Eļļas maiņa',
+  'Riepu maiņa',
+  'Bremžu pārbaude',
+  'Elektronikas remonts',
+  'Cits',
+]
 
 const maintenanceForm = ref({
   car_id: '',
