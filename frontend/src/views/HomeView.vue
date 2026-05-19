@@ -125,10 +125,7 @@ onMounted(loadCars)
         <div>
           <p class="hero-kicker mb-2">Autoparka rezervācija</p>
           <h1 class="hero-title mb-4">Rezervējiet automašīnu tieši no galvenās lapas</h1>
-          <p class="hero-text mb-0">
-            Redziet visas automašīnas, to statusu, kurš tās izmanto un kad sākta pašreizējā rezervācija.
-            Lietotāji ar lomu <strong>Lietotājs</strong> var turēt tikai vienu aktīvu rezervāciju, bet <strong>Administrators</strong> un <strong>Vadība</strong> var rezervēt neierobežoti.
-          </p>
+          
         </div>
 
         <div class="hero-summary">

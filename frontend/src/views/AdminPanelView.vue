@@ -615,9 +615,6 @@ onMounted(async () => {
     <div class="d-flex flex-column flex-md-row align-md-center justify-space-between ga-4 mb-4">
       <div>
         <v-card-title class="px-0 pb-1">Administrācijas panelis</v-card-title>
-        <v-card-subtitle class="px-0">
-          Lietotāju un citu administratīvo sadaļu pārvaldība vienuviet.
-        </v-card-subtitle>
       </div>
 
       <v-chip color="primary" variant="flat" label>
@@ -639,8 +636,7 @@ onMounted(async () => {
             <v-card elevation="2" class="pa-4 h-100">
               <v-card-title class="px-0">Jauna lietotāja izveide</v-card-title>
               <v-card-subtitle class="px-0 pb-4">
-                <span v-if="authStore.role === 'vadiba'">Jūs varat izveidot admin un user kontus.</span>
-                <span v-else-if="authStore.role === 'admin'">Jūs varat izveidot tikai user kontus.</span>
+                <span v-if="authStore.role === 'admin'">Jūs varat izveidot tikai user kontus.</span>
               </v-card-subtitle>
 
               <v-form @submit.prevent="createUser">
@@ -748,9 +744,7 @@ onMounted(async () => {
           <v-col cols="12" md="4">
             <v-card elevation="2" class="pa-4 h-100">
               <v-card-title class="px-0">{{ editingCarId ? 'Automašīnas rediģēšana' : 'Jauna automašīna' }}</v-card-title>
-              <v-card-subtitle class="px-0 pb-4">
-                Aizpildiet automašīnas datus, lai tie tiktu parādīti rezervāciju lapā.
-              </v-card-subtitle>
+              
 
               <v-form @submit.prevent="saveCar">
                 <v-text-field v-model="carForm.brand" label="Zīmols" variant="outlined" density="comfortable" required class="mb-2" />
@@ -904,9 +898,6 @@ onMounted(async () => {
       <v-window-item value="logs">
         <v-card elevation="2" class="pa-2 pa-md-4 h-100">
           <v-card-title>Žurnāls par braucieniem</v-card-title>
-          <v-card-subtitle class="px-4 pb-2">
-            Šeit redzami visi rezervācijas ieraksti: kas rezervēja, kuru auto, kad sāka un kāds ir statuss.
-          </v-card-subtitle>
 
           <v-row class="mb-3" align="center">
             <v-col cols="12" md="6">
@@ -991,9 +982,7 @@ onMounted(async () => {
           <v-col cols="12" md="4">
             <v-card elevation="2" class="pa-4 h-100">
               <v-card-title class="px-0">Jauns apkopes ieraksts</v-card-title>
-              <v-card-subtitle class="px-0 pb-4">
-                Izvēlieties automašīnu un pievienojiet ТО vai remonta informāciju.
-              </v-card-subtitle>
+              
 
               <v-form @submit.prevent="saveMaintenance">
                 <v-select
