@@ -11,6 +11,12 @@ const actionCarId = ref(null)
 const errorMessage = ref('')
 const successMessage = ref('')
 
+// Search & filter state
+const searchQuery = ref('')
+const filterStatus = ref('all')
+const filterTransmission = ref('all')
+const onlyAvailable = ref(false)
+
 const summary = computed(() => ({
   total: cars.value.length,
   free: cars.value.filter((car) => car.status === 'available').length,
@@ -45,6 +51,50 @@ const loadCars = async () => {
     loading.value = false
   }
 }
+
+const transmissions = computed(() => {
+  const set = new Set(cars.value.map((c) => c.transmission_type).filter(Boolean))
+  return [
+    { title: 'Visas', value: 'all' },
+    ...Array.from(set).map((t) => ({ title: t, value: t })),
+  ]
+})
+
+const statusOptions = computed(() => [
+  { title: 'Visi', value: 'all' },
+  { title: 'Brīvas', value: 'available' },
+  { title: 'Rezervētas', value: 'reserved' },
+  { title: 'Apkalpošanā', value: 'maintenance' },
+])
+
+const filteredCars = computed(() => {
+  let list = cars.value.slice()
+
+  if (searchQuery.value && searchQuery.value.trim()) {
+    const q = searchQuery.value.trim().toLowerCase()
+    list = list.filter((car) => {
+      return (
+        (car.brand || '').toLowerCase().includes(q) ||
+        (car.model || '').toLowerCase().includes(q) ||
+        (car.plate_number || '').toLowerCase().includes(q)
+      )
+    })
+  }
+
+  if (filterStatus.value !== 'all') {
+    list = list.filter((car) => car.status === filterStatus.value)
+  }
+
+  if (filterTransmission.value !== 'all') {
+    list = list.filter((car) => car.transmission_type === filterTransmission.value)
+  }
+
+  if (onlyAvailable.value) {
+    list = list.filter((car) => car.status === 'available')
+  }
+
+  return list
+})
 
 const executeAction = async (car, action) => {
   actionCarId.value = car.id
@@ -111,8 +161,46 @@ onMounted(loadCars)
 
     <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-6" />
 
-    <v-row v-if="cars.length" dense>
-      <v-col v-for="car in cars" :key="car.id" cols="12" md="6" lg="4" class="d-flex">
+    <!-- Search & filters -->
+    <v-row class="mb-4" align="center">
+      <v-col cols="12" md="5">
+        <v-text-field
+          v-model="searchQuery"
+          label="Meklēt pēc zīmola, modeļa vai numura"
+          prepend-inner-icon="mdi-magnify"
+          clearable
+        />
+      </v-col>
+
+      <v-col cols="12" sm="6" md="3">
+        <v-select
+          v-model="filterStatus"
+          :items="statusOptions"
+          item-title="title"
+          item-value="value"
+          label="Statuss"
+          dense
+        />
+      </v-col>
+
+      <v-col cols="12" sm="6" md="2">
+        <v-select
+          v-model="filterTransmission"
+          :items="transmissions"
+          item-title="title"
+          item-value="value"
+          label="Ātrumkārba"
+          dense
+        />
+      </v-col>
+
+      <v-col cols="12" md="2" class="d-flex align-center">
+        <v-checkbox v-model="onlyAvailable" label="Tik pieejamās" />
+      </v-col>
+    </v-row>
+
+    <v-row v-if="filteredCars.length" dense>
+      <v-col v-for="car in filteredCars" :key="car.id" cols="12" md="6" lg="4" class="d-flex">
         <v-card class="car-card d-flex flex-column w-100" rounded="xl" elevation="10">
           <v-img :src="car.image_url" height="230" cover class="car-image">
             <div class="car-image-overlay">
@@ -201,6 +289,11 @@ onMounted(loadCars)
         </v-card>
       </v-col>
     </v-row>
+
+    <v-card v-else-if="cars.length && !filteredCars.length && !loading" class="pa-8 text-center" rounded="xl" elevation="4">
+      <v-card-title class="justify-center">Nav atbilstošu rezultātu</v-card-title>
+      <v-card-text>Nav automašīnu, kas atbilst meklēšanas un filtrēšanas kritērijiem.</v-card-text>
+    </v-card>
 
     <v-card v-else-if="!loading" class="pa-8 text-center" rounded="xl" elevation="4">
       <v-card-title class="justify-center">Nav pievienotu automašīnu</v-card-title>
