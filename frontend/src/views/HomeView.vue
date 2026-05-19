@@ -271,6 +271,7 @@ onMounted(loadCars)
                 color="success"
                 variant="flat"
                 :loading="actionCarId === car.id"
+                block
                 @click="completeReservation(car)"
               >
                 Pabeigt
