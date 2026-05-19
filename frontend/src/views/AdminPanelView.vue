@@ -690,7 +690,7 @@ onMounted(async () => {
                 </v-col>
 
                 <v-col cols="12" md="2" class="d-flex align-center">
-                  <v-btn icon @click="usersSortDir = usersSortDir === 'asc' ? 'desc' : 'asc'" :title="usersSortDir === 'asc' ? 'Asc' : 'Desc'">
+                  <v-btn class="sort-dir-btn" icon @click="usersSortDir = usersSortDir === 'asc' ? 'desc' : 'asc'" :title="usersSortDir === 'asc' ? 'Asc' : 'Desc'">
                     <v-icon>{{ usersSortDir === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
                   </v-btn>
                 </v-col>
@@ -840,7 +840,7 @@ onMounted(async () => {
                 </v-col>
 
                 <v-col cols="12" md="2" class="d-flex align-center">
-                  <v-btn icon @click="carsSortDir = carsSortDir === 'asc' ? 'desc' : 'asc'" :title="carsSortDir === 'asc' ? 'Asc' : 'Desc'">
+                  <v-btn class="sort-dir-btn" icon @click="carsSortDir = carsSortDir === 'asc' ? 'desc' : 'asc'" :title="carsSortDir === 'asc' ? 'Asc' : 'Desc'">
                     <v-icon>{{ carsSortDir === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
                   </v-btn>
                 </v-col>
@@ -932,7 +932,7 @@ onMounted(async () => {
             </v-col>
 
             <v-col cols="12" md="2" class="d-flex align-center">
-              <v-btn icon @click="logsSortDir = logsSortDir === 'asc' ? 'desc' : 'asc'" :title="logsSortDir === 'asc' ? 'Asc' : 'Desc'">
+              <v-btn class="sort-dir-btn" icon @click="logsSortDir = logsSortDir === 'asc' ? 'desc' : 'asc'" :title="logsSortDir === 'asc' ? 'Asc' : 'Desc'">
                 <v-icon>{{ logsSortDir === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
               </v-btn>
             </v-col>
@@ -1093,7 +1093,7 @@ onMounted(async () => {
                 </v-col>
 
                 <v-col cols="12" md="2" class="d-flex align-center">
-                  <v-btn icon @click="maintenanceSortDir = maintenanceSortDir === 'asc' ? 'desc' : 'asc'" :title="maintenanceSortDir === 'asc' ? 'Asc' : 'Desc'">
+                  <v-btn class="sort-dir-btn" icon @click="maintenanceSortDir = maintenanceSortDir === 'asc' ? 'desc' : 'asc'" :title="maintenanceSortDir === 'asc' ? 'Asc' : 'Desc'">
                     <v-icon>{{ maintenanceSortDir === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
                   </v-btn>
                 </v-col>
@@ -1176,6 +1176,10 @@ onMounted(async () => {
 .car-form-action-btn {
   flex: 1 1 0;
   min-width: 0;
+}
+
+.sort-dir-btn {
+  margin-top: -23px;
 }
 
 @media (max-width: 600px) {
