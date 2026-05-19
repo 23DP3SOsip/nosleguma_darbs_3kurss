@@ -352,11 +352,11 @@ onMounted(loadCars)
 }
 
 .summary-card.success {
-  background: rgba(120, 120, 120, 0.06);
+  background: rgba(4, 193,7,0.22);
 }
 
 .summary-card.danger {
-  background: rgba(120, 120, 120, 0.06);
+  background: rgba(193, 7, 7, 0.22);
 }
 
 .summary-card.warning {
