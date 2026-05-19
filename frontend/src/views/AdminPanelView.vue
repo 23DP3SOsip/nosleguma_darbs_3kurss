@@ -34,6 +34,10 @@ const deletingCarId = ref(null)
 const carErrorMessage = ref('')
 const carSuccessMessage = ref('')
 const editingCarId = ref(null)
+// Cars search & sort
+const carsSearchQuery = ref('')
+const carsSortKey = ref('id')
+const carsSortDir = ref('asc')
 
 const maintenanceLogs = ref([])
 const loadingMaintenance = ref(false)
@@ -93,6 +97,38 @@ const carOptions = computed(() => {
     title: `${car.brand} ${car.model} (${car.plate_number})`,
     value: car.id,
   }))
+})
+
+const filteredSortedCars = computed(() => {
+  let list = cars.value.slice()
+
+  const q = carsSearchQuery.value.trim().toLowerCase()
+  if (q) {
+    list = list.filter((c) => {
+      return (
+        String(c.id).includes(q) ||
+        (c.brand || '').toLowerCase().includes(q) ||
+        (c.model || '').toLowerCase().includes(q) ||
+        (c.plate_number || '').toLowerCase().includes(q) ||
+        (c.transmission_type || '').toLowerCase().includes(q)
+      )
+    })
+  }
+
+  const key = carsSortKey.value
+  const dir = carsSortDir.value === 'asc' ? 1 : -1
+
+  list.sort((a, b) => {
+    const va = a[key]
+    const vb = b[key]
+    if (va == null && vb == null) return 0
+    if (va == null) return -1 * dir
+    if (vb == null) return 1 * dir
+    if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * dir
+    return String(va).localeCompare(String(vb)) * dir
+  })
+
+  return list
 })
 
 const allowedRoles = computed(() => {
@@ -591,6 +627,35 @@ onMounted(async () => {
             <v-card elevation="2" class="pa-2 pa-md-4 h-100">
               <v-card-title>Visas automašīnas</v-card-title>
 
+              <v-row class="mb-3" align="center">
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="carsSearchQuery" label="Meklēt pēc ID, zīmola, modeļa vai numura" clearable />
+                </v-col>
+
+                <v-col cols="12" md="4">
+                  <v-select
+                    v-model="carsSortKey"
+                    :items="[
+                      { title: 'ID', value: 'id' },
+                      { title: 'Zīmols', value: 'brand' },
+                      { title: 'Numurzīme', value: 'plate_number' },
+                      { title: 'Ātrumkārba', value: 'transmission_type' },
+                      { title: 'Statuss', value: 'status' },
+                    ]"
+                    item-title="title"
+                    item-value="value"
+                    label="Kārtot pēc"
+                    dense
+                  />
+                </v-col>
+
+                <v-col cols="12" md="2" class="d-flex align-center">
+                  <v-btn icon @click="carsSortDir = carsSortDir === 'asc' ? 'desc' : 'asc'" :title="carsSortDir === 'asc' ? 'Asc' : 'Desc'">
+                    <v-icon>{{ carsSortDir === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+
               <v-alert v-if="carErrorMessage" type="error" variant="tonal" class="mx-4 my-2">{{ carErrorMessage }}</v-alert>
               <v-alert v-if="carSuccessMessage" type="success" variant="tonal" class="mx-4 my-2">{{ carSuccessMessage }}</v-alert>
 
@@ -608,7 +673,7 @@ onMounted(async () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="car in cars" :key="car.id">
+                  <tr v-for="car in filteredSortedCars" :key="car.id">
                     <td>{{ car.id }}</td>
                     <td>
                       <div class="font-weight-medium">{{ car.brand }} {{ car.model }}</div>
