@@ -22,6 +22,10 @@ const savingUser = ref(false)
 const deletingId = ref(null)
 const userErrorMessage = ref('')
 const userSuccessMessage = ref('')
+// Users search & sort
+const usersSearchQuery = ref('')
+const usersSortKey = ref('id')
+const usersSortDir = ref('asc')
 
 const cars = ref([])
 const loadingCars = ref(false)
@@ -101,6 +105,42 @@ const allowedRoles = computed(() => {
   }
 
   return []
+})
+
+const filteredSortedUsers = computed(() => {
+  let list = users.value.slice()
+
+  const q = usersSearchQuery.value.trim().toLowerCase()
+  if (q) {
+    list = list.filter((u) => {
+      return (
+        String(u.id).includes(q) ||
+        (u.name || '').toLowerCase().includes(q) ||
+        (u.email || '').toLowerCase().includes(q) ||
+        (u.role || '').toLowerCase().includes(q)
+      )
+    })
+  }
+
+  const key = usersSortKey.value
+  const dir = usersSortDir.value === 'asc' ? 1 : -1
+
+  list.sort((a, b) => {
+    const va = a[key]
+    const vb = b[key]
+
+    if (va == null && vb == null) return 0
+    if (va == null) return -1 * dir
+    if (vb == null) return 1 * dir
+
+    if (typeof va === 'number' && typeof vb === 'number') {
+      return (va - vb) * dir
+    }
+
+    return String(va).localeCompare(String(vb)) * dir
+  })
+
+  return list
 })
 
 const loadUsers = async () => {
@@ -403,6 +443,33 @@ onMounted(async () => {
             <v-card elevation="2" class="pa-2 pa-md-4 h-100">
               <v-card-title>Visi lietotāji</v-card-title>
 
+              <v-row class="mb-3" align="center">
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="usersSearchQuery"
+                    label="Meklēt pēc ID, vārda vai e-pasta"
+                    clearable
+                  />
+                </v-col>
+
+                <v-col cols="12" md="4">
+                  <v-select
+                    v-model="usersSortKey"
+                    :items="[{title:'ID', value:'id'},{title:'Vārds', value:'name'},{title:'E-pasts', value:'email'},{title:'Loma', value:'role'},{title:'Izveidots', value:'created_at'}]"
+                    item-title="title"
+                    item-value="value"
+                    label="Kārtot pēc"
+                    dense
+                  />
+                </v-col>
+
+                <v-col cols="12" md="2" class="d-flex align-center">
+                  <v-btn icon @click="usersSortDir = usersSortDir === 'asc' ? 'desc' : 'asc'" :title="usersSortDir === 'asc' ? 'Asc' : 'Desc'">
+                    <v-icon>{{ usersSortDir === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+
               <v-alert v-if="userErrorMessage" type="error" variant="tonal" class="mx-4 my-2">{{ userErrorMessage }}</v-alert>
               <v-alert v-if="userSuccessMessage" type="success" variant="tonal" class="mx-4 my-2">{{ userSuccessMessage }}</v-alert>
 
@@ -421,7 +488,7 @@ onMounted(async () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="user in users" :key="user.id">
+                  <tr v-for="user in filteredSortedUsers" :key="user.id">
                     <td>{{ user.id }}</td>
                     <td>{{ user.name }}</td>
                     <td>{{ user.email }}</td>
