@@ -937,9 +937,9 @@ onMounted(async () => {
               </v-btn>
             </v-col>
 
-            <v-col cols="12" md="2" class="d-flex align-center">
-              <v-select v-model="logsExportPeriod" :items="exportPeriods" item-title="title" item-value="value" label="Periods" dense hide-details style="width:160px" />
-              <v-btn small class="ms-2" color="secondary" variant="tonal" @click="exportLogsPdf">Eksportēt PDF</v-btn>
+            <v-col cols="12" md="3" class="d-flex flex-column align-start">
+              <v-select v-model="logsExportPeriod" :items="exportPeriods" item-title="title" item-value="value" label="Periods" dense hide-details style="width:100%; max-width:240px" />
+              <v-btn small class="mt-2" color="secondary" variant="tonal" @click="exportLogsPdf">Eksportēt PDF</v-btn>
             </v-col>
           </v-row>
 
@@ -1098,9 +1098,9 @@ onMounted(async () => {
                   </v-btn>
                 </v-col>
 
-                <v-col cols="12" md="2" class="d-flex align-center">
-                  <v-select v-model="maintenanceExportPeriod" :items="exportPeriods" item-title="title" item-value="value" label="Periods" dense hide-details style="width:160px" />
-                  <v-btn small class="ms-2" color="secondary" variant="tonal" @click="exportMaintenancePdf">Eksportēt PDF</v-btn>
+                <v-col cols="12" md="3" class="d-flex flex-column align-start">
+                  <v-select v-model="maintenanceExportPeriod" :items="exportPeriods" item-title="title" item-value="value" label="Periods" dense hide-details style="width:100%; max-width:240px" />
+                  <v-btn small class="mt-2" color="secondary" variant="tonal" @click="exportMaintenancePdf">Eksportēt PDF</v-btn>
                 </v-col>
               </v-row>
 
