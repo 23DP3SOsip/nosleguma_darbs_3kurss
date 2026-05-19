@@ -61,6 +61,8 @@ const maintenanceTypes = [
 const maintenanceSearchQuery = ref('')
 const maintenanceSortKey = ref('id')
 const maintenanceSortDir = ref('asc')
+// Maintenance export period
+const maintenanceExportPeriod = ref('all')
 
 const filteredSortedMaintenance = computed(() => {
   let list = maintenanceLogs.value.slice()
@@ -113,6 +115,8 @@ const logsErrorMessage = ref('')
 const logsSearchQuery = ref('')
 const logsSortKey = ref('id')
 const logsSortDir = ref('asc')
+// Logs export period
+const logsExportPeriod = ref('all')
 
 const filteredSortedReservationLogs = computed(() => {
   let list = reservationLogs.value.slice()
@@ -167,6 +171,14 @@ const transmissionTypes = ['Automātiskā', 'Manuālā']
 const carStatuses = [
   { title: 'Pieejama', value: 'available' },
   { title: 'Apkalpošanā', value: 'maintenance' },
+]
+
+const exportPeriods = [
+  { title: 'Visi', value: 'all' },
+  { title: 'Šomēnes', value: 'month' },
+  { title: 'Pēdējie 3 mēneši', value: '3m' },
+  { title: 'Pēdējie 6 mēneši', value: '6m' },
+  { title: 'Pēdējais gads', value: '12m' },
 ]
 
 const carOptions = computed(() => {
@@ -490,6 +502,107 @@ const deleteMaintenanceLog = async (log) => {
   } finally {
     deletingMaintenanceId.value = null
   }
+}
+
+const exportHtmlTable = (title, headers, rows, summaryLines = []) => {
+  const w = window.open('', '_blank')
+  const style = `
+    body{font-family: Arial, Helvetica, sans-serif; padding:20px}
+    h1{font-size:18px}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{border:1px solid #ddd;padding:8px;text-align:left}
+    .summary{margin-top:10px;font-weight:600}
+  `
+
+  const thead = `<tr>${headers.map((h) => `<th>${h}</th>`).join('')}</tr>`
+  const tbody = rows
+    .map((r) => `<tr>${r.map((c) => `<td>${c ?? ''}</td>`).join('')}</tr>`)
+    .join('')
+
+  const summaryHtml = summaryLines && summaryLines.length ? `<div class="summary">${summaryLines.map((s) => `<div>${s}</div>`).join('')}</div>` : ''
+
+  w.document.write(`<!doctype html><html><head><title>${title}</title><style>${style}</style></head><body><h1>${title}</h1>${summaryHtml}<table><thead>${thead}</thead><tbody>${tbody}</tbody></table></body></html>`)
+  w.document.close()
+  w.focus()
+  setTimeout(() => {
+    w.print()
+  }, 500)
+}
+
+const getCutoffDate = (period) => {
+  if (!period || period === 'all') return null
+  const now = new Date()
+  if (period === 'month') return new Date(now.getFullYear(), now.getMonth(), 1)
+  if (period === '3m') {
+    const d = new Date(now)
+    d.setMonth(d.getMonth() - 3)
+    return d
+  }
+  if (period === '6m') {
+    const d = new Date(now)
+    d.setMonth(d.getMonth() - 6)
+    return d
+  }
+  if (period === '12m') {
+    const d = new Date(now)
+    d.setFullYear(d.getFullYear() - 1)
+    return d
+  }
+  return null
+}
+
+const filterByPeriod = (list, dateKey, period) => {
+  const cutoff = getCutoffDate(period)
+  if (!cutoff) return list
+  const resolve = (obj, k) => (k && k.includes('.') ? k.split('.').reduce((o, x) => (o ? o[x] : undefined), obj) : obj?.[k])
+  return list.filter((item) => {
+    const v = resolve(item, dateKey)
+    if (!v) return false
+    const dt = new Date(v)
+    return dt >= cutoff
+  })
+}
+
+const exportLogsPdf = () => {
+  const base = filteredSortedReservationLogs.value
+  const filtered = filterByPeriod(base, 'started_at', logsExportPeriod.value)
+  const rows = filtered.map((r) => [
+    r.id,
+    `${r.car?.brand || ''} ${r.car?.model || ''} (${r.car?.plate_number || ''})`,
+    r.user?.name || '',
+    r.status_label || r.status || '',
+    r.started_at ? new Date(r.started_at).toLocaleString('lv-LV') : '-',
+    r.ended_at ? new Date(r.ended_at).toLocaleString('lv-LV') : '-',
+  ])
+
+  const totalReservations = filtered.length
+  const summary = [`Kopā rezervācijas: ${totalReservations}`]
+
+  exportHtmlTable('Žurnāla pārskats', ['ID', 'Automašīna', 'Lietotājs', 'Statuss', 'Sākts', 'Pabeigts'], rows, summary)
+}
+
+const exportMaintenancePdf = () => {
+  const baseM = filteredSortedMaintenance.value
+  const filteredM = filterByPeriod(baseM, 'performed_at', maintenanceExportPeriod.value)
+  const rows = filteredM.map((m) => [
+    m.id,
+    `${m.car?.brand || ''} ${m.car?.model || ''} (${m.car?.plate_number || ''})`,
+    m.maintenance_type || '',
+    m.description || '',
+    m.performed_at ? new Date(m.performed_at).toLocaleString('lv-LV') : '-',
+    m.mileage ?? '-',
+    m.cost ?? '-',
+  ])
+
+  // compute total cost (sum numeric costs)
+  const total = filteredM.reduce((acc, it) => {
+    const v = parseFloat(it.cost)
+    return acc + (isNaN(v) ? 0 : v)
+  }, 0)
+
+  const summary = [`Kopējā summa: ${total.toFixed(2)} €`]
+
+  exportHtmlTable('Apkopes pārskats', ['ID', 'Automašīna', 'Veids', 'Apraksts', 'Datums', 'Nobraukums', 'Cena'], rows, summary)
 }
 
 onMounted(async () => {
@@ -823,6 +936,11 @@ onMounted(async () => {
                 <v-icon>{{ logsSortDir === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
               </v-btn>
             </v-col>
+
+            <v-col cols="12" md="2" class="d-flex align-center">
+              <v-select v-model="logsExportPeriod" :items="exportPeriods" item-title="title" item-value="value" label="Periods" dense hide-details style="width:160px" />
+              <v-btn small class="ms-2" color="secondary" variant="tonal" @click="exportLogsPdf">Eksportēt PDF</v-btn>
+            </v-col>
           </v-row>
 
           <v-alert v-if="logsErrorMessage" type="error" variant="tonal" class="mx-4 my-2">{{ logsErrorMessage }}</v-alert>
@@ -978,6 +1096,11 @@ onMounted(async () => {
                   <v-btn icon @click="maintenanceSortDir = maintenanceSortDir === 'asc' ? 'desc' : 'asc'" :title="maintenanceSortDir === 'asc' ? 'Asc' : 'Desc'">
                     <v-icon>{{ maintenanceSortDir === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
                   </v-btn>
+                </v-col>
+
+                <v-col cols="12" md="2" class="d-flex align-center">
+                  <v-select v-model="maintenanceExportPeriod" :items="exportPeriods" item-title="title" item-value="value" label="Periods" dense hide-details style="width:160px" />
+                  <v-btn small class="ms-2" color="secondary" variant="tonal" @click="exportMaintenancePdf">Eksportēt PDF</v-btn>
                 </v-col>
               </v-row>
 
