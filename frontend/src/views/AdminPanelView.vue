@@ -109,6 +109,44 @@ const reservationLogs = ref([])
 const loadingLogs = ref(false)
 const logsErrorMessage = ref('')
 
+// Logs search & sort
+const logsSearchQuery = ref('')
+const logsSortKey = ref('id')
+const logsSortDir = ref('asc')
+
+const filteredSortedReservationLogs = computed(() => {
+  let list = reservationLogs.value.slice()
+
+  const q = logsSearchQuery.value.trim().toLowerCase()
+  if (q) {
+    list = list.filter((r) => {
+      return (
+        String(r.id).includes(q) ||
+        (r.user?.name || '').toLowerCase().includes(q) ||
+        (r.car?.brand || '').toLowerCase().includes(q) ||
+        (r.car?.model || '').toLowerCase().includes(q) ||
+        (r.car?.plate_number || '').toLowerCase().includes(q)
+      )
+    })
+  }
+
+  const key = logsSortKey.value
+  const dir = logsSortDir.value === 'asc' ? 1 : -1
+  const resolve = (obj, k) => (k && k.includes('.') ? k.split('.').reduce((o, x) => (o ? o[x] : undefined), obj) : obj?.[k])
+
+  list.sort((a, b) => {
+    const va = resolve(a, key)
+    const vb = resolve(b, key)
+    if (va == null && vb == null) return 0
+    if (va == null) return -1 * dir
+    if (vb == null) return 1 * dir
+    if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * dir
+    return String(va).localeCompare(String(vb)) * dir
+  })
+
+  return list
+})
+
 const form = ref({
   name: '',
   email: '',
@@ -757,6 +795,36 @@ onMounted(async () => {
             Šeit redzami visi rezervācijas ieraksti: kas rezervēja, kuru auto, kad sāka un kāds ir statuss.
           </v-card-subtitle>
 
+          <v-row class="mb-3" align="center">
+            <v-col cols="12" md="6">
+              <v-text-field v-model="logsSearchQuery" label="Meklēt pēc ID, auto, lietotāja vai numura" clearable />
+            </v-col>
+
+            <v-col cols="12" md="4">
+              <v-select
+                v-model="logsSortKey"
+                :items="[
+                  { title: 'ID', value: 'id' },
+                  { title: 'Automašīna', value: 'car.brand' },
+                  { title: 'Lietotājs', value: 'user.name' },
+                  { title: 'Statuss', value: 'status' },
+                  { title: 'Sākts', value: 'started_at' },
+                  { title: 'Pabeigts', value: 'ended_at' },
+                ]"
+                item-title="title"
+                item-value="value"
+                label="Kārtot pēc"
+                dense
+              />
+            </v-col>
+
+            <v-col cols="12" md="2" class="d-flex align-center">
+              <v-btn icon @click="logsSortDir = logsSortDir === 'asc' ? 'desc' : 'asc'" :title="logsSortDir === 'asc' ? 'Asc' : 'Desc'">
+                <v-icon>{{ logsSortDir === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+
           <v-alert v-if="logsErrorMessage" type="error" variant="tonal" class="mx-4 my-2">{{ logsErrorMessage }}</v-alert>
 
           <v-progress-linear v-if="loadingLogs" indeterminate color="primary" class="mb-2" />
@@ -773,7 +841,7 @@ onMounted(async () => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="log in reservationLogs" :key="log.id">
+              <tr v-for="log in filteredSortedReservationLogs" :key="log.id">
                 <td>{{ log.id }}</td>
                 <td>
                   <div class="font-weight-medium">{{ log.car.brand }} {{ log.car.model }}</div>
