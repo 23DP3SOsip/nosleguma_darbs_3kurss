@@ -57,6 +57,45 @@ const maintenanceTypes = [
   'Cits',
 ]
 
+// Maintenance search & sort
+const maintenanceSearchQuery = ref('')
+const maintenanceSortKey = ref('id')
+const maintenanceSortDir = ref('asc')
+
+const filteredSortedMaintenance = computed(() => {
+  let list = maintenanceLogs.value.slice()
+
+  const q = maintenanceSearchQuery.value.trim().toLowerCase()
+  if (q) {
+    list = list.filter((m) => {
+      return (
+        String(m.id).includes(q) ||
+        (m.maintenance_type || '').toLowerCase().includes(q) ||
+        (m.description || '').toLowerCase().includes(q) ||
+        (m.user?.name || '').toLowerCase().includes(q) ||
+        (m.car?.brand || '').toLowerCase().includes(q) ||
+        (m.car?.model || '').toLowerCase().includes(q) ||
+        (m.car?.plate_number || '').toLowerCase().includes(q)
+      )
+    })
+  }
+
+  const key = maintenanceSortKey.value
+  const dir = maintenanceSortDir.value === 'asc' ? 1 : -1
+
+  list.sort((a, b) => {
+    const va = a[key]
+    const vb = b[key]
+    if (va == null && vb == null) return 0
+    if (va == null) return -1 * dir
+    if (vb == null) return 1 * dir
+    if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * dir
+    return String(va).localeCompare(String(vb)) * dir
+  })
+
+  return list
+})
+
 const maintenanceForm = ref({
   car_id: '',
   maintenance_type: '',
@@ -845,6 +884,35 @@ onMounted(async () => {
             <v-card elevation="2" class="pa-2 pa-md-4 h-100">
               <v-card-title>Apkopes ieraksti</v-card-title>
 
+              <v-row class="mb-3" align="center">
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="maintenanceSearchQuery" label="Meklēt pēc ID, auto, veida vai lietotāja" clearable />
+                </v-col>
+
+                <v-col cols="12" md="4">
+                  <v-select
+                    v-model="maintenanceSortKey"
+                    :items="[
+                      { title: 'ID', value: 'id' },
+                      { title: 'Automašīna', value: 'car.brand' },
+                      { title: 'Veids', value: 'maintenance_type' },
+                      { title: 'Datums', value: 'performed_at' },
+                      { title: 'Nobraukums', value: 'mileage' },
+                    ]"
+                    item-title="title"
+                    item-value="value"
+                    label="Kārtot pēc"
+                    dense
+                  />
+                </v-col>
+
+                <v-col cols="12" md="2" class="d-flex align-center">
+                  <v-btn icon @click="maintenanceSortDir = maintenanceSortDir === 'asc' ? 'desc' : 'asc'" :title="maintenanceSortDir === 'asc' ? 'Asc' : 'Desc'">
+                    <v-icon>{{ maintenanceSortDir === 'asc' ? 'mdi-arrow-up' : 'mdi-arrow-down' }}</v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+
               <v-alert v-if="maintenanceErrorMessage" type="error" variant="tonal" class="mx-4 my-2">{{ maintenanceErrorMessage }}</v-alert>
               <v-alert v-if="maintenanceSuccessMessage" type="success" variant="tonal" class="mx-4 my-2">{{ maintenanceSuccessMessage }}</v-alert>
 
@@ -864,7 +932,7 @@ onMounted(async () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="log in maintenanceLogs" :key="log.id">
+                  <tr v-for="log in filteredSortedMaintenance" :key="log.id">
                     <td>{{ log.id }}</td>
                     <td>
                       <div class="font-weight-medium">{{ log.car.brand }} {{ log.car.model }}</div>
