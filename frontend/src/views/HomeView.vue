@@ -195,7 +195,7 @@ onMounted(loadCars)
       </v-col>
 
       <v-col cols="12" md="2" class="d-flex align-center">
-        <v-checkbox v-model="onlyAvailable" label="Tik pieejamās" />
+        <v-checkbox v-model="onlyAvailable" label="Tikai pieejamās" />
       </v-col>
     </v-row>
 
