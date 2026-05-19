@@ -112,6 +112,26 @@ const maintenanceForm = ref({
   cost: '',
 })
 
+const performedAtField = ref(null)
+
+function openPerformedAtPicker() {
+  // Try component ref -> native input -> call focus+click or showPicker
+  const comp = performedAtField.value
+  const input = comp?.$el?.querySelector('input') || comp?.$el || document.querySelector('input[type="datetime-local"][name=performed_at]')
+  if (input) {
+    try {
+      if (typeof input.showPicker === 'function') {
+        input.showPicker()
+        return
+      }
+    } catch (e) {
+      // ignore
+    }
+    input.focus()
+    input.click()
+  }
+}
+
 const reservationLogs = ref([])
 const loadingLogs = ref(false)
 const logsErrorMessage = ref('')
@@ -1134,6 +1154,9 @@ onMounted(async () => {
                   density="comfortable"
                   required
                   class="mb-2"
+                  append-inner-icon="mdi-calendar"
+                  ref="performedAtField"
+                  @click:append-inner="openPerformedAtPicker"
                 />
 
                 <v-text-field
@@ -1283,5 +1306,16 @@ onMounted(async () => {
   .car-form-actions {
     flex-direction: column;
   }
+}
+
+/* Hide native browser date/datetime picker icon so only mdi-calendar remains */
+::v-deep input[type="date"]::-webkit-calendar-picker-indicator,
+::v-deep input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  display: none !important;
+}
+::v-deep input[type="date"],
+::v-deep input[type="datetime-local"] {
+  -webkit-appearance: none;
+  appearance: none;
 }
 </style>
