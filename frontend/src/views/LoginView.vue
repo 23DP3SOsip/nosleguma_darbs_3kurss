@@ -26,8 +26,9 @@ const submit = async () => {
 </script>
 
 <template>
-  <v-container class="fill-height d-flex align-center justify-center">
-    <v-card class="pa-6" max-width="420" width="100%" elevation="6">
+  <div class="login-wrapper">
+    <v-container class="fill-height d-flex align-center justify-center">
+      <v-card class="pa-6" max-width="420" width="100%" elevation="6">
       <v-card-title class="text-h5 font-weight-bold pa-0 mb-2">Pieslēgšanās</v-card-title>
       <v-card-subtitle class="pa-0 mb-6">Publiska reģistrācija nav pieejama.</v-card-subtitle>
 
@@ -67,6 +68,17 @@ const submit = async () => {
           Ieiet sistēmā
         </v-btn>
       </v-form>
-    </v-card>
-  </v-container>
+      </v-card>
+    </v-container>
+  </div>
 </template>
+
+<style scoped>
+.login-wrapper {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+</style>

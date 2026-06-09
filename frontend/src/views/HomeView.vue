@@ -414,5 +414,75 @@ onMounted(loadCars)
   .hero-grid {
     grid-template-columns: 1fr;
   }
+
+  .hero-shell {
+    padding: 20px !important;
+  }
+
+  .hero-title {
+    max-width: none;
+    font-size: clamp(1.8rem, 8vw, 2.6rem);
+  }
+
+  .hero-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .summary-value {
+    font-size: 1.6rem;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .info-row strong {
+    text-align: left;
+  }
+
+  .car-image-overlay {
+    inset: 12px 12px auto auto;
+  }
+
+  .car-card :deep(.v-card-actions) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .car-card :deep(.v-btn) {
+    width: 100%;
+  }
+
+  .reservation-box {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-page {
+    gap: 18px;
+  }
+
+  .hero-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-kicker {
+    font-size: 0.72rem;
+  }
+
+  .car-image {
+    height: 180px;
+  }
+
+  .car-card :deep(.v-card-title),
+  .car-card :deep(.v-card-subtitle),
+  .car-card :deep(.v-card-text) {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }
 </style>

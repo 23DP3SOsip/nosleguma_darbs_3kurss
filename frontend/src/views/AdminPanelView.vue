@@ -714,8 +714,8 @@ onMounted(async () => {
       <v-tab value="logs">Žurnāli</v-tab>
     </v-tabs>
 
-    <v-window v-model="activeTab">
-      <v-window-item value="users">
+    <div class="admin-tab-panels">
+      <section v-show="activeTab === 'users'">
         <v-row>
           <v-col cols="12" md="4">
             <v-card elevation="2" class="pa-4 h-100">
@@ -782,28 +782,29 @@ onMounted(async () => {
 
               <v-progress-linear v-if="loadingUsers" indeterminate color="primary" class="mb-2" />
 
-              <v-table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Vārds</th>
-                    <th>E-pasts</th>
-                    <th>Loma</th>
-                    <th>Izveidoja</th>
-                    <th>Izveidots</th>
-                    <th>Darbības</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="user in filteredSortedUsers" :key="user.id">
-                    <td>{{ user.id }}</td>
-                    <td>{{ user.name }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.role }}</td>
-                    <td>{{ user.created_by_name || '-' }}</td>
-                    <td>{{ user.created_at ? new Date(user.created_at).toLocaleString('lv-LV') : '-' }}</td>
-                    <td>
-                      <div class="d-flex ga-2">
+              <div class="table-scroll">
+                <v-table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Vārds</th>
+                      <th>E-pasts</th>
+                      <th>Loma</th>
+                      <th>Izveidoja</th>
+                      <th>Izveidots</th>
+                      <th>Darbības</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="user in filteredSortedUsers" :key="user.id">
+                      <td>{{ user.id }}</td>
+                      <td>{{ user.name }}</td>
+                      <td>{{ user.email }}</td>
+                      <td>{{ user.role }}</td>
+                      <td>{{ user.created_by_name || '-' }}</td>
+                      <td>{{ user.created_at ? new Date(user.created_at).toLocaleString('lv-LV') : '-' }}</td>
+                      <td>
+                        <div class="d-flex ga-2 table-actions">
                           <v-btn
                             v-if="!(authStore.role === 'admin' && (user.role === 'admin' || user.role === 'vadiba'))"
                             size="small"
@@ -826,15 +827,16 @@ onMounted(async () => {
                           Dzēst
                         </v-btn>
                         <span v-else class="text-medium-emphasis">Nav atļauts</span>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </v-table>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </div>
             </v-card>
           </v-col>
         </v-row>
-      </v-window-item>
+      </section>
 
       <!-- Edit user dialog -->
       <v-dialog v-model="editingUserId" persistent max-width="560">
@@ -867,7 +869,7 @@ onMounted(async () => {
         </v-card>
       </v-dialog>
 
-      <v-window-item value="cars">
+      <section v-show="activeTab === 'cars'">
         <v-row>
           <v-col cols="12" md="4">
             <v-card elevation="2" class="pa-4 h-100">
@@ -973,57 +975,59 @@ onMounted(async () => {
 
               <v-progress-linear v-if="loadingCars" indeterminate color="primary" class="mb-2" />
 
-              <v-table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Automašīna</th>
-                    <th>Numurzīme</th>
-                    <th>Ātrumkārba</th>
-                    <th>Statuss</th>
-                    <th>Darbības</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="car in filteredSortedCars" :key="car.id">
-                    <td>{{ car.id }}</td>
-                    <td>
-                      <div class="font-weight-medium">{{ car.brand }} {{ car.model }}</div>
-                      <div class="text-caption text-medium-emphasis">{{ car.image_url || 'Nav attēla URL' }}</div>
-                    </td>
-                    <td>{{ car.plate_number }}</td>
-                    <td>{{ car.transmission_type }}</td>
-                    <td>
-                      <v-chip size="small" :color="car.status === 'maintenance' ? 'warning' : car.is_reserved ? 'error' : 'success'" variant="tonal">
-                        {{ car.status === 'maintenance' ? 'Apkalpošanā' : car.is_reserved ? `Rezervēta (${car.reserved_by || 'nezināms'})` : 'Brīva' }}
-                      </v-chip>
-                    </td>
-                    <td>
-                      <div class="d-flex ga-2">
-                        <v-btn size="small" color="primary" variant="flat" @click="fillCarFormForEdit(car)">
-                          Rediģēt
-                        </v-btn>
-                        <v-btn
-                          size="small"
-                          color="error"
-                          variant="flat"
-                          :loading="deletingCarId === car.id"
-                          :disabled="deletingCarId === car.id"
-                          @click="deleteCar(car)"
-                        >
-                          Dzēst
-                        </v-btn>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </v-table>
+              <div class="table-scroll">
+                <v-table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Automašīna</th>
+                      <th>Numurzīme</th>
+                      <th>Ātrumkārba</th>
+                      <th>Statuss</th>
+                      <th>Darbības</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="car in filteredSortedCars" :key="car.id">
+                      <td>{{ car.id }}</td>
+                      <td>
+                        <div class="font-weight-medium">{{ car.brand }} {{ car.model }}</div>
+                        <div class="text-caption text-medium-emphasis">{{ car.image_url || 'Nav attēla URL' }}</div>
+                      </td>
+                      <td>{{ car.plate_number }}</td>
+                      <td>{{ car.transmission_type }}</td>
+                      <td>
+                        <v-chip size="small" :color="car.status === 'maintenance' ? 'warning' : car.is_reserved ? 'error' : 'success'" variant="tonal">
+                          {{ car.status === 'maintenance' ? 'Apkalpošanā' : car.is_reserved ? `Rezervēta (${car.reserved_by || 'nezināms'})` : 'Brīva' }}
+                        </v-chip>
+                      </td>
+                      <td>
+                        <div class="d-flex ga-2 table-actions">
+                          <v-btn size="small" color="primary" variant="flat" @click="fillCarFormForEdit(car)">
+                            Rediģēt
+                          </v-btn>
+                          <v-btn
+                            size="small"
+                            color="error"
+                            variant="flat"
+                            :loading="deletingCarId === car.id"
+                            :disabled="deletingCarId === car.id"
+                            @click="deleteCar(car)"
+                          >
+                            Dzēst
+                          </v-btn>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </div>
             </v-card>
           </v-col>
         </v-row>
-      </v-window-item>
+      </section>
 
-      <v-window-item value="logs">
+      <section v-show="activeTab === 'logs'">
         <v-card elevation="2" class="pa-2 pa-md-4 h-100">
           <v-card-title>Žurnāls par braucieniem</v-card-title>
 
@@ -1066,46 +1070,48 @@ onMounted(async () => {
 
           <v-progress-linear v-if="loadingLogs" indeterminate color="primary" class="mb-2" />
 
-          <v-table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Automašīna</th>
-                <th>Lietotājs</th>
-                <th>Statuss</th>
-                <th>Sākts</th>
-                <th>Pabeigts</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="log in filteredSortedReservationLogs" :key="log.id">
-                <td>{{ log.id }}</td>
-                <td>
-                  <div class="font-weight-medium">{{ log.car.brand }} {{ log.car.model }}</div>
-                  <div class="text-caption text-medium-emphasis">{{ log.car.plate_number }}</div>
-                </td>
-                <td>
-                  <div class="font-weight-medium">{{ log.user.name }}</div>
-                  <div class="text-caption text-medium-emphasis">{{ log.user.role }}</div>
-                </td>
-                <td>
-                  <v-chip size="small" :color="log.status === 'active' ? 'info' : 'success'" variant="tonal">
-                    {{ log.status_label }}
-                  </v-chip>
-                </td>
-                <td>{{ log.started_at ? new Date(log.started_at).toLocaleString('lv-LV') : '-' }}</td>
-                <td>{{ log.ended_at ? new Date(log.ended_at).toLocaleString('lv-LV') : '-' }}</td>
-              </tr>
-            </tbody>
-          </v-table>
+          <div class="table-scroll">
+            <v-table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Automašīna</th>
+                  <th>Lietotājs</th>
+                  <th>Statuss</th>
+                  <th>Sākts</th>
+                  <th>Pabeigts</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="log in filteredSortedReservationLogs" :key="log.id">
+                  <td>{{ log.id }}</td>
+                  <td>
+                    <div class="font-weight-medium">{{ log.car.brand }} {{ log.car.model }}</div>
+                    <div class="text-caption text-medium-emphasis">{{ log.car.plate_number }}</div>
+                  </td>
+                  <td>
+                    <div class="font-weight-medium">{{ log.user.name }}</div>
+                    <div class="text-caption text-medium-emphasis">{{ log.user.role }}</div>
+                  </td>
+                  <td>
+                    <v-chip size="small" :color="log.status === 'active' ? 'info' : 'success'" variant="tonal">
+                      {{ log.status_label }}
+                    </v-chip>
+                  </td>
+                  <td>{{ log.started_at ? new Date(log.started_at).toLocaleString('lv-LV') : '-' }}</td>
+                  <td>{{ log.ended_at ? new Date(log.ended_at).toLocaleString('lv-LV') : '-' }}</td>
+                </tr>
+              </tbody>
+            </v-table>
+          </div>
 
           <v-card-text v-if="!loadingLogs && !reservationLogs.length" class="text-medium-emphasis">
             Žurnālā pagaidām nav ierakstu.
           </v-card-text>
         </v-card>
-      </v-window-item>
+      </section>
 
-      <v-window-item value="maintenance">
+      <section v-show="activeTab === 'maintenance'">
         <v-row>
           <v-col cols="12" md="4">
             <v-card elevation="2" class="pa-4 h-100">
@@ -1229,49 +1235,51 @@ onMounted(async () => {
 
               <v-progress-linear v-if="loadingMaintenance" indeterminate color="primary" class="mb-2" />
 
-              <v-table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Automašīna</th>
-                    <th>Veids</th>
-                    <th>Apraksts</th>
-                    <th>Datums</th>
-                    <th>Nobraukums</th>
-                    <th>Cena</th>
-                    <th>Darbības</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="log in filteredSortedMaintenance" :key="log.id">
-                    <td>{{ log.id }}</td>
-                    <td>
-                      <div class="font-weight-medium">{{ log.car.brand }} {{ log.car.model }}</div>
-                      <div class="text-caption text-medium-emphasis">{{ log.car.plate_number }}</div>
-                    </td>
-                    <td>{{ log.maintenance_type }}</td>
-                    <td>
-                      <div>{{ log.description }}</div>
-                      <div class="text-caption text-medium-emphasis">{{ log.user.name }}</div>
-                    </td>
-                    <td>{{ log.performed_at ? new Date(log.performed_at).toLocaleString('lv-LV') : '-' }}</td>
-                    <td>{{ log.mileage ?? '-' }}</td>
-                    <td>{{ log.cost ?? '-' }}</td>
-                    <td>
-                      <v-btn
-                        color="error"
-                        size="small"
-                        variant="flat"
-                        :loading="deletingMaintenanceId === log.id"
-                        :disabled="deletingMaintenanceId === log.id"
-                        @click="deleteMaintenanceLog(log)"
-                      >
-                        Dzēst
-                      </v-btn>
-                    </td>
-                  </tr>
-                </tbody>
-              </v-table>
+              <div class="table-scroll">
+                <v-table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Automašīna</th>
+                      <th>Veids</th>
+                      <th>Apraksts</th>
+                      <th>Datums</th>
+                      <th>Nobraukums</th>
+                      <th>Cena</th>
+                      <th>Darbības</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="log in filteredSortedMaintenance" :key="log.id">
+                      <td>{{ log.id }}</td>
+                      <td>
+                        <div class="font-weight-medium">{{ log.car.brand }} {{ log.car.model }}</div>
+                        <div class="text-caption text-medium-emphasis">{{ log.car.plate_number }}</div>
+                      </td>
+                      <td>{{ log.maintenance_type }}</td>
+                      <td>
+                        <div>{{ log.description }}</div>
+                        <div class="text-caption text-medium-emphasis">{{ log.user.name }}</div>
+                      </td>
+                      <td>{{ log.performed_at ? new Date(log.performed_at).toLocaleString('lv-LV') : '-' }}</td>
+                      <td>{{ log.mileage ?? '-' }}</td>
+                      <td>{{ log.cost ?? '-' }}</td>
+                      <td>
+                        <v-btn
+                          color="error"
+                          size="small"
+                          variant="flat"
+                          :loading="deletingMaintenanceId === log.id"
+                          :disabled="deletingMaintenanceId === log.id"
+                          @click="deleteMaintenanceLog(log)"
+                        >
+                          Dzēst
+                        </v-btn>
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </div>
 
               <v-card-text v-if="!loadingMaintenance && !maintenanceLogs.length" class="text-medium-emphasis">
                 Apkopes ierakstu pagaidām nav.
@@ -1279,8 +1287,8 @@ onMounted(async () => {
             </v-card>
           </v-col>
         </v-row>
-      </v-window-item>
-    </v-window>
+      </section>
+    </div>
   </v-card>
 </template>
 
@@ -1294,8 +1302,17 @@ onMounted(async () => {
 }
 
 .car-form-action-btn {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-width: 0;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-actions {
+  flex-wrap: wrap;
 }
 
 .sort-dir-btn {
@@ -1305,6 +1322,14 @@ onMounted(async () => {
 @media (max-width: 600px) {
   .car-form-actions {
     flex-direction: column;
+  }
+
+  .table-scroll :deep(table) {
+    min-width: 760px;
+  }
+
+  .sort-dir-btn {
+    margin-top: 0;
   }
 }
 
