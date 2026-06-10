@@ -136,4 +136,4 @@ Projekts ir veidots tā, lai to varētu paplašināt ar:
 
 ## Kontakti
 
-Ja nepieciešama palīdzība, izveidojiet uzdevumu trīskinga sistēmā vai sazinieties ar projekta autoru.
+Ja nepieciešama palīdzība, sazinieties ar projekta autoru.
