@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "packages": {
+    "php": "8.4"
+  },
+  "buildAptPackages": [
+    "bison",
+    "re2c",
+    "libcurl4-openssl-dev",
+    "libreadline-dev",
+    "libicu-dev",
+    "libgd-dev",
+    "libzip-dev",
+    "libpq-dev",
+    "libonig-dev",
+    "gettext"
+  ],
+  "deploy": {
+    "preDeploy": "php artisan migrate --force && php artisan optimize:clear"
+  }
+}
